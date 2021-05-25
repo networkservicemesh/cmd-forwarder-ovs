@@ -1,0 +1,63 @@
+---
+name: Update deployments-k8s reposiotry
+on:
+  push:
+    branches:
+      - main
+  workflow_run:
+    types:
+      - completed
+    workflows:
+      - 'automerge'
+jobs:
+  update-deployments-k8s:
+    name: Update deployments-k8s
+    runs-on: ubuntu-latest
+    if: ${{ github.repository != 'networkservicemesh/cmd-template' && (github.event.workflow_run.conclusion == 'success' && github.actor == 'nsmbot' || github.ref == 'refs/heads/main') }}
+    steps:
+      - name: Checkout ${{ github.repository }}
+        uses: actions/checkout@v2
+        with:
+          path: ${{ github.repository }}
+          repository: ${{ github.repository }}
+          token: ${{ secrets.NSM_BOT_GITHUB_TOKEN }}
+      - uses: benjlevesque/short-sha@v1.2
+        id: short-sha
+        with:
+          length: 8
+      - name: Checkout networkservicemesh/deployments-k8s
+        uses: actions/checkout@v2
+        with:
+          path: networkservicemesh/deployments-k8s
+          repository: networkservicemesh/deployments-k8s
+          token: ${{ secrets.NSM_BOT_GITHUB_TOKEN }}
+      - name: Create commit message
+        working-directory: ${{ github.repository }}
+        run: |
+          echo "Update application version to latest version from ${{ github.repository }}@main ${{ github.repository }}#${{ github.event.number }}" > /tmp/commit-message
+          echo "" >> /tmp/commit-message
+          echo "${{ github.repository }} PR link: https://github.com/${{ github.repository }}/pull/${{ github.event.number }}" >> /tmp/commit-message
+          echo "" >> /tmp/commit-message
+          echo "${{ github.repository }} commit message:" >> /tmp/commit-message
+          git log -1 >> /tmp/commit-message
+          echo "Commit Message:"
+          cat /tmp/commit-message
+      - name: Find and Replace version
+        uses: jacobtomlinson/gha-find-replace@master
+        with:
+          find: "${{ github.event.repository.name }}:.*\n"
+          replace: "${{ github.event.repository.name }}:${{ steps.short-sha.outputs.sha }}\n"
+      - name: Push update to the deployments-k8s
+        working-directory: networkservicemesh/deployments-k8s
+        run: |
+          echo Starting to update repositotry deployments-k8s
+          git add -- .
+          if ! [ -n "$(git diff --cached --exit-code)" ]; then
+            echo Repository already up to date
+            exit 0;
+          fi
+          git config --global user.email "nsmbot@networkservicmesh.io"
+          git config --global user.name "NSMBot"
+          git commit -s -F /tmp/commit-message
+          git checkout -b update/${{ github.repository }}
+          git push -f origin update/${{ github.repository }}

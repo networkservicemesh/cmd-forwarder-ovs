@@ -1,0 +1,50 @@
+---
+name: Update dependent repositories
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  fetch-repositories:
+    name: Fetch organization repositories
+    runs-on: ubuntu-latest
+    outputs:
+      repositories: ${{ steps.organization-repositories.outputs.repositories }}
+    steps:
+      - name: Run `get-organization-repositories`
+        id: organization-repositories
+        uses: denis-tingajkin/get-organization-repositories@v1.0.1
+        with:
+          github-organization: 'networkservicemesh'
+          regex: 'cmd-.*'
+  update-dependent-repositories:
+    strategy:
+      matrix:
+        repository: ${{ fromJSON(needs.fetch-repositories.outputs.repositories) }}
+    needs: fetch-repositories
+    name: Update ${{ matrix.repository }}
+    runs-on: ubuntu-latest
+    if: github.repository == 'networkservicemesh/cmd-template'
+    steps:
+      - name: Checkout ${{ matrix.repository }}
+        uses: actions/checkout@v2
+        with:
+          path: ${{ matrix.repository }}
+          repository: ${{ matrix.repository}}
+          token: ${{ secrets.NSM_BOT_GITHUB_TOKEN }}
+      - name: Sync config files
+        if: matrix.repository != 'networkservicemesh/cmd-template'
+        uses: denis-tingajkin/sync-files@v1.0.2
+        with:
+          git-author-email: 'nsmbot@networkservicmesh.io'
+          git-author-name: 'NSMBot'
+          sync-branch-name: main
+          sync-repository: ${{ github.repository }}
+          sync-ignore-file-name: .templateignore
+          result-branch-name: update/${{ github.repository }}
+          working-directory: ${{ matrix.repository }}
+          allow-files-pattern: (.*\.yaml|.*\.yml|.*\.txt|.*\.md|.*\.conf)
+          exclude-files: |
+            .github/workflows/update-cmd-repositories.yaml
+            .golangci.yml
