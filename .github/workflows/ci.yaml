@@ -3,7 +3,8 @@ name: ci
 on:
   push:
     branches:
-      - main
+      - 'main'
+      - 'release/**'
   pull_request:
 jobs:
   yamllint:
@@ -75,7 +76,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Restrict dependencies on github.com/networkservicemesh/*
         env:
-          ALLOWED_REPOSITORIES: "sdk, api, sdk-ovs"
+          ALLOWED_REPOSITORIES: "sdk, api, sdk-k8s, sdk-vpp, sdk-sriov"
         run: |
           for i in $(grep github.com/networkservicemesh/ go.mod | grep -v '^module' | sed 's;.*\(github.com\/networkservicemesh\/[^ ]*\).*;\1;g');do
             if ! [ "$(echo ${ALLOWED_REPOSITORIES} | grep ${i#github.com/networkservicemesh/})" ]; then

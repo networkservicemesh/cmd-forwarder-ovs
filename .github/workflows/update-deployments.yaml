@@ -24,7 +24,7 @@ jobs:
       - uses: benjlevesque/short-sha@v1.2
         id: short-sha
         with:
-          length: 8
+          length: 7
       - name: Checkout networkservicemesh/deployments-k8s
         uses: actions/checkout@v2
         with:
@@ -47,6 +47,11 @@ jobs:
         with:
           find: "${{ github.event.repository.name }}:.*\n"
           replace: "${{ github.event.repository.name }}:${{ steps.short-sha.outputs.sha }}\n"
+      - name: Find and Replace ci/${{ github.event.repository.name }} version
+        uses: jacobtomlinson/gha-find-replace@master
+        with:
+          find: "ci/${{ github.event.repository.name }}:.*\n"
+          replace: "ci/${{ github.event.repository.name }}:${{ steps.short-sha.outputs.sha }}\n"
       - name: Push update to the deployments-k8s
         working-directory: networkservicemesh/deployments-k8s
         run: |
