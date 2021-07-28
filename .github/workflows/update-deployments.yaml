@@ -13,6 +13,8 @@ jobs:
   update-deployments-k8s:
     name: Update deployments-k8s
     runs-on: ubuntu-latest
+    env:
+      IMAGE_SUFFIX: use-host-ovs
     if: ${{ github.repository != 'networkservicemesh/cmd-template' && (github.event.workflow_run.conclusion == 'success' && github.actor == 'nsmbot' || github.ref == 'refs/heads/main') }}
     steps:
       - name: Checkout ${{ github.repository }}
@@ -42,16 +44,26 @@ jobs:
           git log -1 >> /tmp/commit-message
           echo "Commit Message:"
           cat /tmp/commit-message
-      - name: Find and Replace version
+      - name: Find and Replace ${{ github.event.repository.name }} version
         uses: jacobtomlinson/gha-find-replace@master
         with:
           find: "${{ github.event.repository.name }}:.*\n"
           replace: "${{ github.event.repository.name }}:${{ steps.short-sha.outputs.sha }}\n"
+      - name: Find and Replace ${{ github.event.repository.name }}-${IMAGE_SUFFIX} version
+        uses: jacobtomlinson/gha-find-replace@master
+        with:
+          find: "${{ github.event.repository.name }}-${IMAGE_SUFFIX}:.*\n"
+          replace: "${{ github.event.repository.name }}-${IMAGE_SUFFIX}:${{ steps.short-sha.outputs.sha }}\n"
       - name: Find and Replace ci/${{ github.event.repository.name }} version
         uses: jacobtomlinson/gha-find-replace@master
         with:
           find: "ci/${{ github.event.repository.name }}:.*\n"
           replace: "ci/${{ github.event.repository.name }}:${{ steps.short-sha.outputs.sha }}\n"
+      - name: Find and Replace ci/${{ github.event.repository.name }}-${IMAGE_SUFFIX} version
+        uses: jacobtomlinson/gha-find-replace@master
+        with:
+          find: "ci/${{ github.event.repository.name }}-${IMAGE_SUFFIX}:.*\n"
+          replace: "ci/${{ github.event.repository.name }}-${IMAGE_SUFFIX}:${{ steps.short-sha.outputs.sha }}\n"
       - name: Push update to the deployments-k8s
         working-directory: networkservicemesh/deployments-k8s
         run: |
