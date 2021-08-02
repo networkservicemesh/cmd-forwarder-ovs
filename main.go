@@ -23,13 +23,14 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"os/signal"
 	"path"
+	"syscall"
 	"time"
 
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/edwarnicke/debug"
 	"github.com/edwarnicke/grpcfd"
-	"github.com/edwarnicke/signalctx"
 	"github.com/kelseyhightower/envconfig"
 	registryapi "github.com/networkservicemesh/api/pkg/api/registry"
 	"github.com/networkservicemesh/sdk-k8s/pkg/tools/deviceplugin"
@@ -45,6 +46,7 @@ import (
 	"github.com/networkservicemesh/sdk/pkg/networkservice/common/authorize"
 	registryclient "github.com/networkservicemesh/sdk/pkg/registry/chains/client"
 	"github.com/networkservicemesh/sdk/pkg/tools/grpcutils"
+	"github.com/networkservicemesh/sdk/pkg/tools/jaeger"
 	"github.com/networkservicemesh/sdk/pkg/tools/log"
 	"github.com/networkservicemesh/sdk/pkg/tools/log/logruslogger"
 	"github.com/networkservicemesh/sdk/pkg/tools/opentracing"
@@ -76,14 +78,36 @@ type Config struct {
 }
 
 func main() {
-	ctx := signalctx.WithSignals(context.Background())
-	ctx, cancel := context.WithCancel(ctx)
+	// ********************************************************************************
+	// setup context to catch signals
+	// ********************************************************************************
+	ctx, cancel := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		// More Linux signals here
+		syscall.SIGHUP,
+		syscall.SIGTERM,
+		syscall.SIGQUIT,
+	)
+	defer cancel()
 
+	// ********************************************************************************
+	// setup logging
+	// ********************************************************************************
 	logrus.SetFormatter(&nested.Formatter{})
-	log.EnableTracing(true)
 	ctx = log.WithFields(ctx, map[string]interface{}{"cmd": os.Args[0]})
 	ctx = log.WithLog(ctx, logruslogger.New(ctx))
 
+	// ********************************************************************************
+	// Configure open tracing
+	// ********************************************************************************
+	log.EnableTracing(true)
+	jaegerCloser := jaeger.InitJaeger(ctx, "cmd-forwarder-sriov")
+	defer func() { _ = jaegerCloser.Close() }()
+
+	// ********************************************************************************
+	// Debug self if necessary
+	// ********************************************************************************
 	if err := debug.Self(); err != nil {
 		log.FromContext(ctx).Infof("%s", err)
 	}
@@ -134,7 +158,7 @@ func main() {
 			logrus.Fatalf("error configuring sriov endpoint: %+v", err)
 		}
 	} else {
-		endpoint = xconnectns.NewKernelServer(
+		endpoint, err = xconnectns.NewKernelServer(
 			ctx,
 			config.Name,
 			authorize.NewServer(),
@@ -150,6 +174,9 @@ func main() {
 			grpcfd.WithChainStreamInterceptor(),
 			grpcfd.WithChainUnaryInterceptor(),
 		)
+		if err != nil {
+			logrus.Fatalf("error configuring kernel endpoint: %+v", err)
+		}
 	}
 	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 3: create ovsxconnect network service endpoint")
 
@@ -256,7 +283,7 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, source *w
 		),
 		grpcfd.WithChainStreamInterceptor(),
 		grpcfd.WithChainUnaryInterceptor(),
-	), nil
+	)
 }
 
 func exitOnErrCh(ctx context.Context, cancel context.CancelFunc, errCh <-chan error) {
