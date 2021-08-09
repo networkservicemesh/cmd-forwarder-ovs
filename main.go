@@ -19,12 +19,14 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net"
 	"net/url"
 	"os"
 	"os/signal"
 	"path"
+	"strings"
 	"syscall"
 	"time"
 
@@ -33,7 +35,6 @@ import (
 	"github.com/edwarnicke/grpcfd"
 	"github.com/kelseyhightower/envconfig"
 	registryapi "github.com/networkservicemesh/api/pkg/api/registry"
-	"github.com/networkservicemesh/sdk-k8s/pkg/tools/deviceplugin"
 	k8sdeviceplugin "github.com/networkservicemesh/sdk-k8s/pkg/tools/deviceplugin"
 	k8spodresources "github.com/networkservicemesh/sdk-k8s/pkg/tools/podresources"
 
@@ -65,7 +66,7 @@ type Config struct {
 	Name                string        `default:"forwarder" desc:"Name of Endpoint"`
 	NSName              string        `default:"ovsconnectns" desc:"Name of Network Service to Register with Registry"`
 	BridgeName          string        `default:"br-nsm" desc:"Name of the OvS bridge"`
-	TunnelIP            net.IP        `desc:"IP to use for tunnels" split_words:"true"`
+	TunnelIP            string        `desc:"IP or CIDR to use for tunnels" split_words:"true"`
 	ConnectTo           url.URL       `default:"unix:///connect.to.socket" desc:"url to connect to" split_words:"true"`
 	MaxTokenLifetime    time.Duration `default:"24h" desc:"maximum lifetime of tokens" split_words:"true"`
 	ResourcePollTimeout time.Duration `default:"30s" desc:"device plugin polling timeout" split_words:"true"`
@@ -82,48 +83,12 @@ func main() {
 	// ********************************************************************************
 	// setup context to catch signals
 	// ********************************************************************************
-	ctx, cancel := signal.NotifyContext(
-		context.Background(),
-		os.Interrupt,
-		// More Linux signals here
-		syscall.SIGHUP,
-		syscall.SIGTERM,
-		syscall.SIGQUIT,
-	)
+	ctx, cancel := getTermSigalContext()
 	defer cancel()
 
-	// ********************************************************************************
-	// setup logging
-	// ********************************************************************************
-	logrus.SetFormatter(&nested.Formatter{})
-	ctx = log.WithFields(ctx, map[string]interface{}{"cmd": os.Args[0]})
-	ctx = log.WithLog(ctx, logruslogger.New(ctx))
-
-	// ********************************************************************************
-	// Configure open tracing
-	// ********************************************************************************
-	log.EnableTracing(true)
-	jaegerCloser := jaeger.InitJaeger(ctx, "cmd-forwarder-sriov")
-	defer func() { _ = jaegerCloser.Close() }()
-
-	// ********************************************************************************
-	// Debug self if necessary
-	// ********************************************************************************
-	if err := debug.Self(); err != nil {
-		log.FromContext(ctx).Infof("%s", err)
-	}
+	setupLogger(ctx)
 
 	starttime := time.Now()
-
-	// enumerating phases
-	log.FromContext(ctx).Infof("there are 9 phases which will be executed followed by a success message:")
-	log.FromContext(ctx).Infof("the phases include:")
-	log.FromContext(ctx).Infof("1: get config from environment")
-	log.FromContext(ctx).Infof("2: retrieve spiffe svid")
-	log.FromContext(ctx).Infof("3: create ovsconnect network service endpoint")
-	log.FromContext(ctx).Infof("4: create grpc server and register ovsxconnect")
-	log.FromContext(ctx).Infof("5: register ovsconnectns with the registry")
-	log.FromContext(ctx).Infof("6: final success message with start time duration")
 
 	log.FromContext(ctx).Infof("executing phase 1: get config from environment (time since start: %s)", time.Since(starttime))
 	now := time.Now()
@@ -152,54 +117,23 @@ func main() {
 	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 2: retrieving svid")
 
 	log.FromContext(ctx).Infof("executing phase 3: create ovsxconnect network service endpoint (time since start: %s)", time.Since(starttime))
-	var endpoint endpoint.Endpoint
-	if isSriovConfig(config.SRIOVConfigFile) {
-		endpoint, err = createSriovInterposeEndpoint(ctx, config, source)
-		if err != nil {
-			logrus.Fatalf("error configuring sriov endpoint: %+v", err)
-		}
-	} else {
-		endpoint, err = xconnectns.NewKernelServer(
-			ctx,
-			config.Name,
-			authorize.NewServer(),
-			spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime),
-			&config.ConnectTo,
-			config.BridgeName,
-			config.TunnelIP,
-			grpc.WithTransportCredentials(
-				resetting.NewCredentials(
-					grpcfd.TransportCredentials(credentials.NewTLS(tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny()))),
-					source.Updated())),
-			grpc.WithDefaultCallOptions(
-				grpc.WaitForReady(true),
-				grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
-			),
-			grpcfd.WithChainStreamInterceptor(),
-			grpcfd.WithChainUnaryInterceptor(),
-		)
-		if err != nil {
-			logrus.Fatalf("error configuring kernel endpoint: %+v", err)
-		}
+
+	xConnectEndpoint, err := createInterposeEndpoint(ctx, config, source)
+	if err != nil {
+		logrus.Fatalf("error configuring forwarder endpoint: %+v", err)
 	}
+
 	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 3: create ovsxconnect network service endpoint")
 
 	log.FromContext(ctx).Infof("executing phase 4: create grpc server and register ovsxconnect (time since start: %s)", time.Since(starttime))
-	tmpDir, err := ioutil.TempDir("", "ovs-forwarder")
+	tmpDir, err := ioutil.TempDir("", "cmd-forwarder-ovs")
 	if err != nil {
 		log.FromContext(ctx).Fatalf("error creating tmpDir: %+v", err)
 	}
 	defer func() { _ = os.RemoveAll(tmpDir) }()
 	listenOn := &url.URL{Scheme: "unix", Path: path.Join(tmpDir, "listen_on.io.sock")}
 
-	server := grpc.NewServer(append(
-		opentracing.WithTracing(),
-		grpc.Creds(
-			grpcfd.TransportCredentials(
-				credentials.NewTLS(tlsconfig.MTLSServerConfig(source, source, tlsconfig.AuthorizeAny())),
-			),
-		))...)
-	endpoint.Register(server)
+	server := registerGRPCServer(source, xConnectEndpoint)
 	srvErrCh := grpcutils.ListenAndServe(ctx, listenOn, server)
 	exitOnErrCh(ctx, cancel, srvErrCh)
 	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 4: create grpc server and register ovsxconnect")
@@ -207,25 +141,7 @@ func main() {
 	// ********************************************************************************
 	log.FromContext(ctx).Infof("executing phase 5: register %s with the registry (time since start: %s)", config.NSName, time.Since(starttime))
 	// ********************************************************************************
-	clientOptions := append(
-		opentracing.WithTracingDial(),
-		grpc.WithBlock(),
-		grpc.WithDefaultCallOptions(grpc.WaitForReady(true)),
-		grpc.WithTransportCredentials(
-			grpcfd.TransportCredentials(
-				credentials.NewTLS(
-					tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny()),
-				),
-			),
-		),
-	)
-
-	nseRegistryClient := registryclient.NewNetworkServiceEndpointRegistryInterposeClient(ctx, &config.ConnectTo, registryclient.WithDialOptions(clientOptions...))
-	_, err = nseRegistryClient.Register(ctx, &registryapi.NetworkServiceEndpoint{
-		Name:                config.Name,
-		NetworkServiceNames: []string{config.NSName},
-		Url:                 grpcutils.URLToTarget(listenOn),
-	})
+	err = registerEndpoint(ctx, config, source, listenOn)
 	if err != nil {
 		log.FromContext(ctx).Fatalf("failed to connect to registry: %+v", err)
 	}
@@ -233,13 +149,97 @@ func main() {
 
 	log.FromContext(ctx).Infof("Startup completed in %v", time.Since(starttime))
 
-	// TODO - cleaner shutdown across these two channels
 	<-ctx.Done()
 	<-srvErrCh
-
 }
 
-func createSriovInterposeEndpoint(ctx context.Context, config *Config, source *workloadapi.X509Source) (endpoint.Endpoint, error) {
+func getTermSigalContext() (ctx context.Context, stop context.CancelFunc) {
+	return signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		// More Linux signals here
+		syscall.SIGHUP,
+		syscall.SIGTERM,
+		syscall.SIGQUIT,
+	)
+}
+
+func setupLogger(ctx context.Context) {
+	// ********************************************************************************
+	// setup logging
+	// ********************************************************************************
+	logrus.SetFormatter(&nested.Formatter{})
+	ctx = log.WithFields(ctx, map[string]interface{}{"cmd": os.Args[0]})
+	ctx = log.WithLog(ctx, logruslogger.New(ctx))
+
+	// ********************************************************************************
+	// Configure open tracing
+	// ********************************************************************************
+	log.EnableTracing(true)
+	jaegerCloser := jaeger.InitJaeger(ctx, "cmd-forwarder-sriov")
+	defer func() { _ = jaegerCloser.Close() }()
+
+	// ********************************************************************************
+	// Debug self if necessary
+	// ********************************************************************************
+	if err := debug.Self(); err != nil {
+		log.FromContext(ctx).Infof("%s", err)
+	}
+}
+
+func parseTunnelIPCIDR(tunnelIPStr string) (net.IP, error) {
+	var egressTunnelIP net.IP
+	var err error
+	if strings.Contains(tunnelIPStr, "/") {
+		egressTunnelIP, _, err = net.ParseCIDR(tunnelIPStr)
+		if err != nil {
+			err = fmt.Errorf("tunnel IP must be set to a valid IP CIDR, was set to %s: %v", tunnelIPStr, err)
+		}
+	} else {
+		egressTunnelIP = net.ParseIP(tunnelIPStr)
+		if egressTunnelIP == nil {
+			err = fmt.Errorf("tunnel IP must be set to a valid IP, was set to %s", tunnelIPStr)
+		}
+	}
+	return egressTunnelIP, err
+}
+
+func createInterposeEndpoint(ctx context.Context, config *Config, source *workloadapi.X509Source) (xConnectEndpoint endpoint.Endpoint, err error) {
+	egressTunnelIP, err := parseTunnelIPCIDR(config.TunnelIP)
+	if err != nil {
+		return
+	}
+	if isSriovConfig(config.SRIOVConfigFile) {
+		xConnectEndpoint, err = createSriovInterposeEndpoint(ctx, config, source, egressTunnelIP)
+	} else {
+		xConnectEndpoint, err = createKernelInterposeEndpoint(ctx, config, source, egressTunnelIP)
+	}
+	return
+}
+
+func createKernelInterposeEndpoint(ctx context.Context, config *Config, source *workloadapi.X509Source, egressTunnelIP net.IP) (endpoint.Endpoint, error) {
+	return xconnectns.NewKernelServer(
+		ctx,
+		config.Name,
+		authorize.NewServer(),
+		spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime),
+		&config.ConnectTo,
+		config.BridgeName,
+		egressTunnelIP,
+		grpc.WithTransportCredentials(
+			resetting.NewCredentials(
+				grpcfd.TransportCredentials(credentials.NewTLS(tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny()))),
+				source.Updated())),
+		grpc.WithDefaultCallOptions(
+			grpc.WaitForReady(true),
+			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
+		),
+		grpcfd.WithChainStreamInterceptor(),
+		grpcfd.WithChainUnaryInterceptor(),
+	)
+}
+
+func createSriovInterposeEndpoint(ctx context.Context, config *Config, source *workloadapi.X509Source, egressTunnelIP net.IP) (endpoint.Endpoint, error) {
 	sriovConfig, err := sriovconfig.ReadConfig(ctx, config.SRIOVConfigFile)
 	if err != nil {
 		return nil, err
@@ -259,7 +259,7 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, source *w
 	resourcePool := resource.NewPool(tokenPool, sriovConfig)
 
 	// Start device plugin server
-	if err = deviceplugin.StartServers(
+	if err = k8sdeviceplugin.StartServers(
 		ctx,
 		tokenPool,
 		config.ResourcePollTimeout,
@@ -276,7 +276,7 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, source *w
 		spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime),
 		&config.ConnectTo,
 		config.BridgeName,
-		config.TunnelIP,
+		egressTunnelIP,
 		pciPool,
 		resourcePool,
 		sriovConfig,
@@ -314,4 +314,40 @@ func isSriovConfig(confFile string) bool {
 		return false
 	}
 	return !sriovConfig.IsDir()
+}
+
+func registerGRPCServer(source *workloadapi.X509Source, xConnectEndpoint endpoint.Endpoint) *grpc.Server {
+	server := grpc.NewServer(append(
+		opentracing.WithTracing(),
+		grpc.Creds(
+			grpcfd.TransportCredentials(
+				credentials.NewTLS(tlsconfig.MTLSServerConfig(source, source, tlsconfig.AuthorizeAny())),
+			),
+		))...)
+	xConnectEndpoint.Register(server)
+	return server
+}
+
+func registerEndpoint(ctx context.Context, config *Config, source *workloadapi.X509Source, listenOn *url.URL) error {
+	clientOptions := append(
+		opentracing.WithTracingDial(),
+		grpc.WithBlock(),
+		grpc.WithDefaultCallOptions(grpc.WaitForReady(true)),
+		grpc.WithTransportCredentials(
+			grpcfd.TransportCredentials(
+				credentials.NewTLS(
+					tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny()),
+				),
+			),
+		),
+	)
+
+	nseRegistryClient := registryclient.NewNetworkServiceEndpointRegistryInterposeClient(ctx, &config.ConnectTo, registryclient.WithDialOptions(clientOptions...))
+	_, err := nseRegistryClient.Register(ctx, &registryapi.NetworkServiceEndpoint{
+		Name:                config.Name,
+		NetworkServiceNames: []string{config.NSName},
+		Url:                 grpcutils.URLToTarget(listenOn),
+	})
+
+	return err
 }
