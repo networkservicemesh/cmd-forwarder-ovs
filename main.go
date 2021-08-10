@@ -85,14 +85,25 @@ func main() {
 	// ********************************************************************************
 	// setup context to catch signals
 	// ********************************************************************************
-	ctx, cancel := getTermSigalContext()
+	ctx, cancel := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		// More Linux signals here
+		syscall.SIGHUP,
+		syscall.SIGTERM,
+		syscall.SIGQUIT,
+	)
 	defer cancel()
 
 	setupLogger(ctx)
 
 	starttime := time.Now()
 
+	logPhases(ctx)
+
+	// ********************************************************************************
 	log.FromContext(ctx).Infof("executing phase 1: get config from environment (time since start: %s)", time.Since(starttime))
+	// ********************************************************************************
 	now := time.Now()
 	config := &Config{}
 	if err := envconfig.Usage("nsm", config); err != nil {
@@ -105,7 +116,9 @@ func main() {
 	log.FromContext(ctx).Infof("Config: %#v", config)
 	log.FromContext(ctx).WithField("duration", time.Since(now)).Infof("completed phase 1: get config from environment")
 
+	// ********************************************************************************
 	log.FromContext(ctx).Infof("executing phase 2: retrieving svid, check spire agent logs if this is the last line you see (time since start: %s)", time.Since(starttime))
+	// ********************************************************************************
 	now = time.Now()
 	source, err := workloadapi.NewX509Source(ctx)
 	if err != nil {
@@ -118,16 +131,18 @@ func main() {
 	logrus.Infof("SVID: %q", svid.ID)
 	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 2: retrieving svid")
 
+	// ********************************************************************************
 	log.FromContext(ctx).Infof("executing phase 3: create ovsxconnect network service endpoint (time since start: %s)", time.Since(starttime))
-
+	// ********************************************************************************
 	xConnectEndpoint, err := createInterposeEndpoint(ctx, config, source)
 	if err != nil {
 		logrus.Fatalf("error configuring forwarder endpoint: %+v", err)
 	}
-
 	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 3: create ovsxconnect network service endpoint")
 
+	// ********************************************************************************
 	log.FromContext(ctx).Infof("executing phase 4: create grpc server and register ovsxconnect (time since start: %s)", time.Since(starttime))
+	// ********************************************************************************
 	tmpDir, err := ioutil.TempDir("", "cmd-forwarder-ovs")
 	if err != nil {
 		log.FromContext(ctx).Fatalf("error creating tmpDir: %+v", err)
@@ -155,17 +170,6 @@ func main() {
 	<-srvErrCh
 }
 
-func getTermSigalContext() (ctx context.Context, stop context.CancelFunc) {
-	return signal.NotifyContext(
-		context.Background(),
-		os.Interrupt,
-		// More Linux signals here
-		syscall.SIGHUP,
-		syscall.SIGTERM,
-		syscall.SIGQUIT,
-	)
-}
-
 func setupLogger(ctx context.Context) {
 	// ********************************************************************************
 	// setup logging
@@ -187,6 +191,18 @@ func setupLogger(ctx context.Context) {
 	if err := debug.Self(); err != nil {
 		log.FromContext(ctx).Infof("%s", err)
 	}
+}
+
+func logPhases(ctx context.Context) {
+	// enumerating phases
+	log.FromContext(ctx).Infof("there are 5 phases which will be executed followed by a success message:")
+	log.FromContext(ctx).Infof("the phases include:")
+	log.FromContext(ctx).Infof("1: get config from environment")
+	log.FromContext(ctx).Infof("2: retrieve spiffe svid")
+	log.FromContext(ctx).Infof("3: create ovsconnect network service endpoint")
+	log.FromContext(ctx).Infof("4: create grpc server and register ovsxconnect")
+	log.FromContext(ctx).Infof("5: register ovsconnectns with the registry")
+	log.FromContext(ctx).Infof("a final success message with start time duration")
 }
 
 func parseTunnelIPCIDR(tunnelIPStr string) (net.IP, error) {
