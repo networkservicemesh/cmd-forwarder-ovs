@@ -14,12 +14,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//+build linux
+
 // package main contains ovs forwarder implmentation
 package main
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"net"
 	"net/url"
@@ -37,6 +38,7 @@ import (
 	registryapi "github.com/networkservicemesh/api/pkg/api/registry"
 	k8sdeviceplugin "github.com/networkservicemesh/sdk-k8s/pkg/tools/deviceplugin"
 	k8spodresources "github.com/networkservicemesh/sdk-k8s/pkg/tools/podresources"
+	"github.com/pkg/errors"
 
 	"github.com/networkservicemesh/sdk-ovs/pkg/networkservice/chains/xconnectns"
 	sriovconfig "github.com/networkservicemesh/sdk-sriov/pkg/sriov/config"
@@ -192,13 +194,10 @@ func parseTunnelIPCIDR(tunnelIPStr string) (net.IP, error) {
 	var err error
 	if strings.Contains(tunnelIPStr, "/") {
 		egressTunnelIP, _, err = net.ParseCIDR(tunnelIPStr)
-		if err != nil {
-			err = fmt.Errorf("tunnel IP must be set to a valid IP CIDR, was set to %s: %v", tunnelIPStr, err)
-		}
 	} else {
 		egressTunnelIP = net.ParseIP(tunnelIPStr)
 		if egressTunnelIP == nil {
-			err = fmt.Errorf("tunnel IP must be set to a valid IP, was set to %s", tunnelIPStr)
+			err = errors.New("tunnel IP must be set to a valid IP")
 		}
 	}
 	return egressTunnelIP, err

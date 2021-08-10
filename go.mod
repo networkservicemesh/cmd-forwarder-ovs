@@ -12,6 +12,7 @@ require (
 	github.com/networkservicemesh/sdk-k8s v0.0.0-20210810055749-0005caa246db
 	github.com/networkservicemesh/sdk-ovs v0.0.0-20210809192216-7ba6f46b736e
 	github.com/networkservicemesh/sdk-sriov v0.0.0-20210809201918-4abec71f3999
+	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spiffe/go-spiffe/v2 v2.0.0-beta.2
 	google.golang.org/grpc v1.38.0
