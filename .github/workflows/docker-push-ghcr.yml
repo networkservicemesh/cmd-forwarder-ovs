@@ -35,10 +35,18 @@ jobs:
             type=ref,event=pr
             type=sha,prefix=
 
-      - name: "Build and push"
+      - name: "Build and push for Dockerfile"
         uses: docker/build-push-action@v2
         with:
           file: Dockerfile
+          context: .
+          push: true
+          tags: ${{ steps.metaci.outputs.tags }}
+
+      - name: "Build and push for Dockerfile.use-host-ovs"
+        uses: docker/build-push-action@v2
+        with:
+          file: Dockerfile.use-host-ovs
           context: .
           push: true
           tags: ${{ steps.metaci.outputs.tags }}
