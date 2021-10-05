@@ -53,7 +53,6 @@ import (
 	"github.com/networkservicemesh/sdk/pkg/tools/log"
 	"github.com/networkservicemesh/sdk/pkg/tools/log/logruslogger"
 	"github.com/networkservicemesh/sdk/pkg/tools/opentracing"
-	"github.com/networkservicemesh/sdk/pkg/tools/resetting"
 	"github.com/networkservicemesh/sdk/pkg/tools/spiffejwt"
 	"github.com/networkservicemesh/sdk/pkg/tools/token"
 	"github.com/sirupsen/logrus"
@@ -242,9 +241,7 @@ func createKernelInterposeEndpoint(ctx context.Context, config *Config, source *
 		config.BridgeName,
 		egressTunnelIP,
 		grpc.WithTransportCredentials(
-			resetting.NewCredentials(
-				grpcfd.TransportCredentials(credentials.NewTLS(tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny()))),
-				source.Updated())),
+			grpcfd.TransportCredentials(credentials.NewTLS(tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny())))),
 		grpc.WithDefaultCallOptions(
 			grpc.WaitForReady(true),
 			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
@@ -296,9 +293,7 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, source *w
 		resourcePool,
 		sriovConfig,
 		grpc.WithTransportCredentials(
-			resetting.NewCredentials(
-				grpcfd.TransportCredentials(credentials.NewTLS(tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny()))),
-				source.Updated())),
+			grpcfd.TransportCredentials(credentials.NewTLS(tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny())))),
 		grpc.WithDefaultCallOptions(
 			grpc.WaitForReady(true),
 			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
