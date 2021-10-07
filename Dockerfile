@@ -29,11 +29,9 @@ RUN /usr/bin/ovsdb-tool create /etc/openvswitch/conf.db
 RUN mkdir -pv /var/run/openvswitch/
 
 # Add configuration files
-ADD build/run_supervisord.sh /bin/run_supervisord.sh
 ADD build/supervisord.conf /etc/supervisord.conf
 ADD build/configure-ovs.sh /usr/share/openvswitch/
 RUN chmod 755 /usr/share/openvswitch/configure-ovs.sh
-RUN chmod +x /bin/run_supervisord.sh
 
-# When container starts, run_supervisord.sh is executed
-ENTRYPOINT ["/bin/run_supervisord.sh"]
+# When container starts, run supervisord process
+ENTRYPOINT ["/usr/bin/supervisord"]
