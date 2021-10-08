@@ -1,5 +1,5 @@
 ---
-name: docker-push-ghcr
+name: docker-push-ghcr-use-host-ovs
 
 on:
   push:
@@ -30,15 +30,15 @@ jobs:
         id: metaci
         uses: docker/metadata-action@v3
         with:
-          images: ghcr.io/${{ github.repository_owner }}/ci/${{ github.event.repository.name }}
+          images: ghcr.io/${{ github.repository_owner }}/ci/${{ github.event.repository.name }}-use-host-ovs
           tags: |
             type=ref,event=pr
             type=sha,prefix=
 
-      - name: "Build and push for Dockerfile"
+      - name: "Build and push for Dockerfile.use-host-ovs"
         uses: docker/build-push-action@v2
         with:
-          file: Dockerfile
+          file: Dockerfile.use-host-ovs
           context: .
           push: true
           tags: ${{ steps.metaci.outputs.tags }}
