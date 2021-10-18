@@ -450,8 +450,8 @@ github.com/networkservicemesh/sdk-k8s v0.0.0-20210929180939-adf19e0dded1 h1:KoBR
 github.com/networkservicemesh/sdk-k8s v0.0.0-20210929180939-adf19e0dded1/go.mod h1:KJHuXhka7guWBmiKPxURlwdUCD94pLRhqnFZYJB1AP8=
 github.com/networkservicemesh/sdk-kernel v0.0.0-20211014092923-08c76a5ebb5c h1:Qh/zpbpupujQ7WtbbE33cIzKaV3JLrie9TsGjslFsgo=
 github.com/networkservicemesh/sdk-kernel v0.0.0-20211014092923-08c76a5ebb5c/go.mod h1:3bouhA9gAe0mMpnohxDD7xYGkNhiEEQQgBywT/iwQtM=
-github.com/networkservicemesh/sdk-ovs v0.0.0-20211014094158-53b51d04cb0b h1:AxUGk1i08Wt3KR9W5eRBGtCUlCA3l6JR8xiMP85fGUs=
-github.com/networkservicemesh/sdk-ovs v0.0.0-20211014094158-53b51d04cb0b/go.mod h1:ihe1xKqZth4E0tBndnqtd/A12tSrbhlR9hT7AfTHiRU=
+github.com/networkservicemesh/sdk-ovs v0.0.0-20211018120934-a4e24fde2186 h1:1gAgpreBUv+T1y+6SDJ8g0EBQYh1OJEuCAJyeDRXm5g=
+github.com/networkservicemesh/sdk-ovs v0.0.0-20211018120934-a4e24fde2186/go.mod h1:ihe1xKqZth4E0tBndnqtd/A12tSrbhlR9hT7AfTHiRU=
 github.com/networkservicemesh/sdk-sriov v0.0.0-20211014093500-f12ea1fa1fb9 h1:mrgAnF9j3UIMgwhvgBxbL7YiX3kR+RedjlFbhS20bEA=
 github.com/networkservicemesh/sdk-sriov v0.0.0-20211014093500-f12ea1fa1fb9/go.mod h1:y3cWs+kbipNsskTzRuGtFsQvvMNF54wb5fWkm+E379Q=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
