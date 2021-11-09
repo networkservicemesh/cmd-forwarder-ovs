@@ -355,7 +355,7 @@ func registerEndpoint(ctx context.Context, config *Config, source *workloadapi.X
 		),
 	)
 
-	nseRegistryClient := registryclient.NewNetworkServiceEndpointRegistryInterposeClient(ctx, &config.ConnectTo, registryclient.WithDialOptions(clientOptions...))
+	nseRegistryClient := registryclient.NewNetworkServiceEndpointRegistryClient(ctx, &config.ConnectTo, registryclient.WithDialOptions(clientOptions...))
 	_, err := nseRegistryClient.Register(ctx, &registryapi.NetworkServiceEndpoint{
 		Name:                config.Name,
 		NetworkServiceNames: []string{config.NSName},
