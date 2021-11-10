@@ -65,7 +65,7 @@ import (
 // Config - configuration for cmd-forwarder-ovs
 type Config struct {
 	Name                string        `default:"forwarder" desc:"Name of Endpoint"`
-	NSName              string        `default:"ovsconnectns" desc:"Name of Network Service to Register with Registry"`
+	NSName              string        `default:"forwarder" desc:"Name of Network Service to Register with Registry"`
 	BridgeName          string        `default:"br-nsm" desc:"Name of the OvS bridge"`
 	TunnelIP            string        `desc:"IP or CIDR to use for tunnels" split_words:"true"`
 	ConnectTo           url.URL       `default:"unix:///connect.to.socket" desc:"url to connect to" split_words:"true"`
@@ -201,9 +201,9 @@ func logPhases(ctx context.Context) {
 	log.FromContext(ctx).Infof("the phases include:")
 	log.FromContext(ctx).Infof("1: get config from environment")
 	log.FromContext(ctx).Infof("2: retrieve spiffe svid")
-	log.FromContext(ctx).Infof("3: create ovsconnect network service endpoint")
+	log.FromContext(ctx).Infof("3: create ovs forwarder network service endpoint")
 	log.FromContext(ctx).Infof("4: create grpc server and register ovsxconnect")
-	log.FromContext(ctx).Infof("5: register ovsconnectns with the registry")
+	log.FromContext(ctx).Infof("5: register ovs forwarder network service with the registry")
 	log.FromContext(ctx).Infof("a final success message with start time duration")
 }
 
