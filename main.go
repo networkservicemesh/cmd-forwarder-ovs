@@ -40,7 +40,7 @@ import (
 	k8spodresources "github.com/networkservicemesh/sdk-k8s/pkg/tools/podresources"
 	"github.com/pkg/errors"
 
-	"github.com/networkservicemesh/sdk-ovs/pkg/networkservice/chains/xconnectns"
+	"github.com/networkservicemesh/sdk-ovs/pkg/networkservice/chains/forwarder"
 	sriovconfig "github.com/networkservicemesh/sdk-sriov/pkg/sriov/config"
 	"github.com/networkservicemesh/sdk-sriov/pkg/sriov/pci"
 	"github.com/networkservicemesh/sdk-sriov/pkg/sriov/resource"
@@ -69,6 +69,7 @@ type Config struct {
 	BridgeName          string        `default:"br-nsm" desc:"Name of the OvS bridge"`
 	TunnelIP            string        `desc:"IP or CIDR to use for tunnels" split_words:"true"`
 	ConnectTo           url.URL       `default:"unix:///connect.to.socket" desc:"url to connect to" split_words:"true"`
+	DialTimeout         time.Duration `default:"50ms" desc:"Timeout for the dial the next endpoint" split_words:"true"`
 	MaxTokenLifetime    time.Duration `default:"24h" desc:"maximum lifetime of tokens" split_words:"true"`
 	ResourcePollTimeout time.Duration `default:"30s" desc:"device plugin polling timeout" split_words:"true"`
 	DevicePluginPath    string        `default:"/var/lib/kubelet/device-plugins/" desc:"path to the device plugin directory" split_words:"true"`
@@ -235,7 +236,7 @@ func createInterposeEndpoint(ctx context.Context, config *Config, source *worklo
 }
 
 func createKernelInterposeEndpoint(ctx context.Context, config *Config, source *workloadapi.X509Source, egressTunnelIP net.IP) (endpoint.Endpoint, error) {
-	return xconnectns.NewKernelServer(
+	return forwarder.NewKernelServer(
 		ctx,
 		config.Name,
 		authorize.NewServer(),
@@ -243,10 +244,11 @@ func createKernelInterposeEndpoint(ctx context.Context, config *Config, source *
 		&config.ConnectTo,
 		config.BridgeName,
 		egressTunnelIP,
+		config.DialTimeout,
+		grpc.WithBlock(),
 		grpc.WithTransportCredentials(
 			grpcfd.TransportCredentials(credentials.NewTLS(tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny())))),
 		grpc.WithDefaultCallOptions(
-			grpc.WaitForReady(true),
 			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
 		),
 		grpcfd.WithChainStreamInterceptor(),
@@ -284,7 +286,7 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, source *w
 		return nil, err
 	}
 
-	return xconnectns.NewSriovServer(
+	return forwarder.NewSriovServer(
 		ctx,
 		config.Name,
 		authorize.NewServer(),
@@ -295,10 +297,11 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, source *w
 		pciPool,
 		resourcePool,
 		sriovConfig,
+		config.DialTimeout,
+		grpc.WithBlock(),
 		grpc.WithTransportCredentials(
 			grpcfd.TransportCredentials(credentials.NewTLS(tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny())))),
 		grpc.WithDefaultCallOptions(
-			grpc.WaitForReady(true),
 			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
 		),
 		grpcfd.WithChainStreamInterceptor(),
