@@ -10,7 +10,7 @@ require (
 	github.com/networkservicemesh/api v1.0.1-0.20211110183123-3038992da61a
 	github.com/networkservicemesh/sdk v0.5.1-0.20211126201711-e33b665d2e98
 	github.com/networkservicemesh/sdk-k8s v0.0.0-20211102193828-c29ab6e0f743
-	github.com/networkservicemesh/sdk-ovs v0.0.0-20211126213001-7f85ebdee455
+	github.com/networkservicemesh/sdk-ovs v1.1.0-rc.1
 	github.com/networkservicemesh/sdk-sriov v0.0.0-20211126202310-a7556a9e5b49
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
