@@ -6,7 +6,7 @@ on:
     types:
       - completed
     workflows:
-      - 'ci'
+      - "ci"
 jobs:
   docker:
     runs-on: ubuntu-latest
@@ -38,3 +38,11 @@ jobs:
           context: .
           push: true
           tags: "ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ steps.get-tag-step.outputs.tag }}"
+
+      - name: "Build and push [use-host-ovs]"
+        uses: docker/build-push-action@v2
+        with:
+          file: Dockerfile.use-host-ovs
+          context: .
+          push: true
+          tags: "ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-use-host-ovs:${{ steps.get-tag-step.outputs.tag }}"
