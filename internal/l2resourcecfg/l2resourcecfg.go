@@ -14,8 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package devicecfg provides service domain to device config
-package devicecfg
+// Package l2resourcecfg provides parsing factilty for l2 connection point config
+// map for VLAN breakout case.
+package l2resourcecfg
 
 import (
 	"context"
@@ -28,7 +29,7 @@ import (
 	"github.com/networkservicemesh/sdk/pkg/tools/log/logruslogger"
 )
 
-// Config contains list of available service domains
+// Config contains list of available l2 connection endpoints
 type Config struct {
 	Interfaces []*Resource `yaml:"interfaces"`
 	Bridges    []*Resource `yaml:"bridges"`
@@ -63,6 +64,7 @@ func (c *Config) String() string {
 // Resource contains an available interface or bridge name and related matches
 type Resource struct {
 	Name    string       `yaml:"name"`
+	Bridge  string       `yaml:"bridge,omitempty"`
 	Matches []*Selectors `yaml:"matches"`
 }
 
@@ -121,13 +123,13 @@ func ReadConfig(ctx context.Context, configFile string) (*Config, error) {
 		return nil, err
 	}
 	for _, device := range cfg.Interfaces {
-		err := validateResource(device)
+		err := validateResource(device, true)
 		if err != nil {
 			return nil, err
 		}
 	}
 	for _, bridge := range cfg.Bridges {
-		err := validateResource(bridge)
+		err := validateResource(bridge, false)
 		if err != nil {
 			return nil, err
 		}
@@ -136,12 +138,15 @@ func ReadConfig(ctx context.Context, configFile string) (*Config, error) {
 	return cfg, nil
 }
 
-func validateResource(res *Resource) error {
+func validateResource(res *Resource, isInterface bool) error {
 	if res == nil {
 		return nil
 	}
 	if res.Name == "" {
 		return errors.Errorf("resource name must be set")
+	}
+	if isInterface && res.Bridge == "" {
+		return errors.Errorf("bridge name must be set for interface")
 	}
 	for i := range res.Matches {
 		if len(res.Matches[i].LabelSelector) == 0 {
