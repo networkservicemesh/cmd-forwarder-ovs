@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package devicecfg_test
+package l2resourcecfg_test
 
 import (
 	"context"
@@ -22,13 +22,14 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/networkservicemesh/cmd-forwarder-ovs/internal/devicecfg"
+	devicecfg "github.com/networkservicemesh/cmd-forwarder-ovs/internal/l2resourcecfg"
 )
 
 const (
 	configFileName = "config.yml"
 	bridgeName     = "br-data"
 	ifName1        = "eth1"
+	ifBridge       = "br0"
 	via0           = "gw0"
 	via1           = "gw1"
 )
@@ -39,7 +40,8 @@ func TestReadConfigFile(t *testing.T) {
 	require.Equal(t, &devicecfg.Config{
 		Interfaces: []*devicecfg.Resource{
 			{
-				Name: ifName1,
+				Name:   ifName1,
+				Bridge: ifBridge,
 				Matches: []*devicecfg.Selectors{
 					{
 						LabelSelector: []*devicecfg.Labels{

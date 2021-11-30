@@ -40,7 +40,10 @@ import (
 	k8spodresources "github.com/networkservicemesh/sdk-k8s/pkg/tools/podresources"
 	"github.com/pkg/errors"
 
+	"github.com/networkservicemesh/cmd-forwarder-ovs/internal/l2resourcecfg"
+
 	"github.com/networkservicemesh/sdk-ovs/pkg/networkservice/chains/forwarder"
+	ovsutil "github.com/networkservicemesh/sdk-ovs/pkg/tools/utils"
 	sriovconfig "github.com/networkservicemesh/sdk-sriov/pkg/sriov/config"
 	"github.com/networkservicemesh/sdk-sriov/pkg/sriov/pci"
 	"github.com/networkservicemesh/sdk-sriov/pkg/sriov/resource"
@@ -64,22 +67,23 @@ import (
 
 // Config - configuration for cmd-forwarder-ovs
 type Config struct {
-	Name                string        `default:"forwarder" desc:"Name of Endpoint"`
-	NSName              string        `default:"forwarder" desc:"Name of Network Service to Register with Registry"`
-	BridgeName          string        `default:"br-nsm" desc:"Name of the OvS bridge"`
-	TunnelIP            string        `desc:"IP or CIDR to use for tunnels" split_words:"true"`
-	ConnectTo           url.URL       `default:"unix:///connect.to.socket" desc:"url to connect to" split_words:"true"`
-	DialTimeout         time.Duration `default:"50ms" desc:"Timeout for the dial the next endpoint" split_words:"true"`
-	MaxTokenLifetime    time.Duration `default:"24h" desc:"maximum lifetime of tokens" split_words:"true"`
-	ResourcePollTimeout time.Duration `default:"30s" desc:"device plugin polling timeout" split_words:"true"`
-	DevicePluginPath    string        `default:"/var/lib/kubelet/device-plugins/" desc:"path to the device plugin directory" split_words:"true"`
-	PodResourcesPath    string        `default:"/var/lib/kubelet/pod-resources/" desc:"path to the pod resources directory" split_words:"true"`
-	SRIOVConfigFile     string        `default:"pci.config" desc:"PCI resources config path" split_words:"true"`
-	PCIDevicesPath      string        `default:"/sys/bus/pci/devices" desc:"path to the PCI devices directory" split_words:"true"`
-	PCIDriversPath      string        `default:"/sys/bus/pci/drivers" desc:"path to the PCI drivers directory" split_words:"true"`
-	CgroupPath          string        `default:"/host/sys/fs/cgroup/devices" desc:"path to the host cgroup directory" split_words:"true"`
-	VFIOPath            string        `default:"/host/dev/vfio" desc:"path to the host VFIO directory" split_words:"true"`
-	LogLevel            string        `default:"INFO" desc:"Log level" split_words:"true"`
+	Name                   string        `default:"forwarder" desc:"Name of Endpoint"`
+	NSName                 string        `default:"forwarder" desc:"Name of Network Service to Register with Registry"`
+	BridgeName             string        `default:"br-nsm" desc:"Name of the OvS bridge"`
+	TunnelIP               string        `desc:"IP or CIDR to use for tunnels" split_words:"true"`
+	ConnectTo              url.URL       `default:"unix:///connect.to.socket" desc:"url to connect to" split_words:"true"`
+	DialTimeout            time.Duration `default:"50ms" desc:"Timeout for the dial the next endpoint" split_words:"true"`
+	MaxTokenLifetime       time.Duration `default:"24h" desc:"maximum lifetime of tokens" split_words:"true"`
+	ResourcePollTimeout    time.Duration `default:"30s" desc:"device plugin polling timeout" split_words:"true"`
+	DevicePluginPath       string        `default:"/var/lib/kubelet/device-plugins/" desc:"path to the device plugin directory" split_words:"true"`
+	PodResourcesPath       string        `default:"/var/lib/kubelet/pod-resources/" desc:"path to the pod resources directory" split_words:"true"`
+	SRIOVConfigFile        string        `default:"pci.config" desc:"PCI resources config path" split_words:"true"`
+	L2ResourceSelectorFile string        `default:"" desc:"config file for resource to label matching" split_words:"true"`
+	PCIDevicesPath         string        `default:"/sys/bus/pci/devices" desc:"path to the PCI devices directory" split_words:"true"`
+	PCIDriversPath         string        `default:"/sys/bus/pci/drivers" desc:"path to the PCI drivers directory" split_words:"true"`
+	CgroupPath             string        `default:"/host/sys/fs/cgroup/devices" desc:"path to the host cgroup directory" split_words:"true"`
+	VFIOPath               string        `default:"/host/dev/vfio" desc:"path to the host VFIO directory" split_words:"true"`
+	LogLevel               string        `default:"INFO" desc:"Log level" split_words:"true"`
 }
 
 func main() {
@@ -185,7 +189,7 @@ func setupLogger(ctx context.Context) {
 	// Configure open tracing
 	// ********************************************************************************
 	log.EnableTracing(true)
-	jaegerCloser := jaeger.InitJaeger(ctx, "cmd-forwarder-sriov")
+	jaegerCloser := jaeger.InitJaeger(ctx, "cmd-forwarder-ovs")
 	defer func() { _ = jaegerCloser.Close() }()
 
 	// ********************************************************************************
@@ -208,6 +212,41 @@ func logPhases(ctx context.Context) {
 	log.FromContext(ctx).Infof("a final success message with start time duration")
 }
 
+func getL2ConnectionPointMap(ctx context.Context, cfg *Config) map[string]*ovsutil.L2ConnectionPoint {
+	if cfg.L2ResourceSelectorFile == "" {
+		return nil
+	}
+	resource2LabSel, err := l2resourcecfg.ReadConfig(ctx, cfg.L2ResourceSelectorFile)
+	if err != nil {
+		log.FromContext(ctx).Fatalf("failed to get device selector configuration file: %+v", err)
+	}
+	if len(resource2LabSel.Interfaces) == 0 {
+		log.FromContext(ctx).Warn("skipping matching labels to device names: empty interface list")
+		return nil
+	}
+	l2C := make(map[string]*ovsutil.L2ConnectionPoint)
+	for _, device := range resource2LabSel.Interfaces {
+		egressPoint := &ovsutil.L2ConnectionPoint{}
+		egressPoint.Bridge = device.Bridge
+		for i := range device.Matches {
+			for j := range device.Matches[i].LabelSelector {
+				egressPoint.Interface = device.Name
+				l2C[device.Matches[i].LabelSelector[j].Via] = egressPoint
+			}
+		}
+	}
+	for _, bridge := range resource2LabSel.Bridges {
+		egressPoint := &ovsutil.L2ConnectionPoint{}
+		egressPoint.Bridge = bridge.Name
+		for i := range bridge.Matches {
+			for j := range bridge.Matches[i].LabelSelector {
+				l2C[bridge.Matches[i].LabelSelector[j].Via] = egressPoint
+			}
+		}
+	}
+	return l2C
+}
+
 func parseTunnelIPCIDR(tunnelIPStr string) (net.IP, error) {
 	var egressTunnelIP net.IP
 	var err error
@@ -227,15 +266,17 @@ func createInterposeEndpoint(ctx context.Context, config *Config, source *worklo
 	if err != nil {
 		return
 	}
+	l2cMap := getL2ConnectionPointMap(ctx, config)
 	if isSriovConfig(config.SRIOVConfigFile) {
-		xConnectEndpoint, err = createSriovInterposeEndpoint(ctx, config, source, egressTunnelIP)
+		xConnectEndpoint, err = createSriovInterposeEndpoint(ctx, config, source, egressTunnelIP, l2cMap)
 	} else {
-		xConnectEndpoint, err = createKernelInterposeEndpoint(ctx, config, source, egressTunnelIP)
+		xConnectEndpoint, err = createKernelInterposeEndpoint(ctx, config, source, egressTunnelIP, l2cMap)
 	}
 	return
 }
 
-func createKernelInterposeEndpoint(ctx context.Context, config *Config, source *workloadapi.X509Source, egressTunnelIP net.IP) (endpoint.Endpoint, error) {
+func createKernelInterposeEndpoint(ctx context.Context, config *Config, source *workloadapi.X509Source,
+	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint) (endpoint.Endpoint, error) {
 	return forwarder.NewKernelServer(
 		ctx,
 		config.Name,
@@ -245,6 +286,7 @@ func createKernelInterposeEndpoint(ctx context.Context, config *Config, source *
 		config.BridgeName,
 		egressTunnelIP,
 		config.DialTimeout,
+		l2cMap,
 		grpc.WithBlock(),
 		grpc.WithTransportCredentials(
 			grpcfd.TransportCredentials(credentials.NewTLS(tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny())))),
@@ -256,7 +298,8 @@ func createKernelInterposeEndpoint(ctx context.Context, config *Config, source *
 	)
 }
 
-func createSriovInterposeEndpoint(ctx context.Context, config *Config, source *workloadapi.X509Source, egressTunnelIP net.IP) (endpoint.Endpoint, error) {
+func createSriovInterposeEndpoint(ctx context.Context, config *Config, source *workloadapi.X509Source,
+	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint) (endpoint.Endpoint, error) {
 	sriovConfig, err := sriovconfig.ReadConfig(ctx, config.SRIOVConfigFile)
 	if err != nil {
 		return nil, err
@@ -298,6 +341,7 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, source *w
 		resourcePool,
 		sriovConfig,
 		config.DialTimeout,
+		l2cMap,
 		grpc.WithBlock(),
 		grpc.WithTransportCredentials(
 			grpcfd.TransportCredentials(credentials.NewTLS(tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny())))),
