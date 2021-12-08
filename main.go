@@ -220,8 +220,8 @@ func getL2ConnectionPointMap(ctx context.Context, cfg *Config) map[string]*ovsut
 	if err != nil {
 		log.FromContext(ctx).Fatalf("failed to get device selector configuration file: %+v", err)
 	}
-	if len(resource2LabSel.Interfaces) == 0 {
-		log.FromContext(ctx).Warn("skipping matching labels to device names: empty interface list")
+	if len(resource2LabSel.Interfaces) == 0 && len(resource2LabSel.Bridges) == 0 {
+		log.FromContext(ctx).Warn("skipping matching labels to device names: empty interface and bridge list")
 		return nil
 	}
 	l2C := make(map[string]*ovsutil.L2ConnectionPoint)
