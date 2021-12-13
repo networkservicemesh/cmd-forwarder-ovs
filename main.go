@@ -67,23 +67,24 @@ import (
 
 // Config - configuration for cmd-forwarder-ovs
 type Config struct {
-	Name                   string        `default:"forwarder" desc:"Name of Endpoint"`
-	NSName                 string        `default:"forwarder" desc:"Name of Network Service to Register with Registry"`
-	BridgeName             string        `default:"br-nsm" desc:"Name of the OvS bridge"`
-	TunnelIP               string        `desc:"IP or CIDR to use for tunnels" split_words:"true"`
-	ConnectTo              url.URL       `default:"unix:///connect.to.socket" desc:"url to connect to" split_words:"true"`
-	DialTimeout            time.Duration `default:"50ms" desc:"Timeout for the dial the next endpoint" split_words:"true"`
-	MaxTokenLifetime       time.Duration `default:"24h" desc:"maximum lifetime of tokens" split_words:"true"`
-	ResourcePollTimeout    time.Duration `default:"30s" desc:"device plugin polling timeout" split_words:"true"`
-	DevicePluginPath       string        `default:"/var/lib/kubelet/device-plugins/" desc:"path to the device plugin directory" split_words:"true"`
-	PodResourcesPath       string        `default:"/var/lib/kubelet/pod-resources/" desc:"path to the pod resources directory" split_words:"true"`
-	SRIOVConfigFile        string        `default:"pci.config" desc:"PCI resources config path" split_words:"true"`
-	L2ResourceSelectorFile string        `default:"" desc:"config file for resource to label matching" split_words:"true"`
-	PCIDevicesPath         string        `default:"/sys/bus/pci/devices" desc:"path to the PCI devices directory" split_words:"true"`
-	PCIDriversPath         string        `default:"/sys/bus/pci/drivers" desc:"path to the PCI drivers directory" split_words:"true"`
-	CgroupPath             string        `default:"/host/sys/fs/cgroup/devices" desc:"path to the host cgroup directory" split_words:"true"`
-	VFIOPath               string        `default:"/host/dev/vfio" desc:"path to the host VFIO directory" split_words:"true"`
-	LogLevel               string        `default:"INFO" desc:"Log level" split_words:"true"`
+	Name                   string            `default:"forwarder" desc:"Name of Endpoint"`
+	Labels                 map[string]string `default:"p2p:true" desc:"Labels related to this forwarder-vpp instance"`
+	NSName                 string            `default:"forwarder" desc:"Name of Network Service to Register with Registry"`
+	BridgeName             string            `default:"br-nsm" desc:"Name of the OvS bridge"`
+	TunnelIP               string            `desc:"IP or CIDR to use for tunnels" split_words:"true"`
+	ConnectTo              url.URL           `default:"unix:///connect.to.socket" desc:"url to connect to" split_words:"true"`
+	DialTimeout            time.Duration     `default:"50ms" desc:"Timeout for the dial the next endpoint" split_words:"true"`
+	MaxTokenLifetime       time.Duration     `default:"24h" desc:"maximum lifetime of tokens" split_words:"true"`
+	ResourcePollTimeout    time.Duration     `default:"30s" desc:"device plugin polling timeout" split_words:"true"`
+	DevicePluginPath       string            `default:"/var/lib/kubelet/device-plugins/" desc:"path to the device plugin directory" split_words:"true"`
+	PodResourcesPath       string            `default:"/var/lib/kubelet/pod-resources/" desc:"path to the pod resources directory" split_words:"true"`
+	SRIOVConfigFile        string            `default:"pci.config" desc:"PCI resources config path" split_words:"true"`
+	L2ResourceSelectorFile string            `default:"" desc:"config file for resource to label matching" split_words:"true"`
+	PCIDevicesPath         string            `default:"/sys/bus/pci/devices" desc:"path to the PCI devices directory" split_words:"true"`
+	PCIDriversPath         string            `default:"/sys/bus/pci/drivers" desc:"path to the PCI drivers directory" split_words:"true"`
+	CgroupPath             string            `default:"/host/sys/fs/cgroup/devices" desc:"path to the host cgroup directory" split_words:"true"`
+	VFIOPath               string            `default:"/host/dev/vfio" desc:"path to the host VFIO directory" split_words:"true"`
+	LogLevel               string            `default:"INFO" desc:"Log level" split_words:"true"`
 }
 
 func main() {
@@ -182,7 +183,7 @@ func setupLogger(ctx context.Context) {
 	// setup logging
 	// ********************************************************************************
 	logrus.SetFormatter(&nested.Formatter{})
-	ctx = log.WithFields(ctx, map[string]interface{}{"cmd": os.Args[0]})
+	ctx = log.WithLog(ctx, logruslogger.New(ctx, map[string]interface{}{"cmd": os.Args[0]}))
 	ctx = log.WithLog(ctx, logruslogger.New(ctx))
 
 	// ********************************************************************************
@@ -388,7 +389,7 @@ func registerGRPCServer(source *workloadapi.X509Source, xConnectEndpoint endpoin
 	return server
 }
 
-func registerEndpoint(ctx context.Context, config *Config, source *workloadapi.X509Source, listenOn *url.URL) error {
+func registerEndpoint(ctx context.Context, cfg *Config, source *workloadapi.X509Source, listenOn *url.URL) error {
 	clientOptions := append(
 		opentracing.WithTracingDial(),
 		grpc.WithBlock(),
@@ -402,12 +403,20 @@ func registerEndpoint(ctx context.Context, config *Config, source *workloadapi.X
 		),
 	)
 
-	nseRegistryClient := registryclient.NewNetworkServiceEndpointRegistryClient(ctx, &config.ConnectTo, registryclient.WithDialOptions(clientOptions...))
-	_, err := nseRegistryClient.Register(ctx, &registryapi.NetworkServiceEndpoint{
-		Name:                config.Name,
-		NetworkServiceNames: []string{config.NSName},
+	registryClient := registryclient.NewNetworkServiceEndpointRegistryClient(ctx, &cfg.ConnectTo, registryclient.WithDialOptions(clientOptions...))
+	_, err := registryClient.Register(ctx, &registryapi.NetworkServiceEndpoint{
+		Name: cfg.Name,
+		NetworkServiceLabels: map[string]*registryapi.NetworkServiceLabels{
+			cfg.NSName: {
+				Labels: cfg.Labels,
+			},
+		},
+		NetworkServiceNames: []string{cfg.NSName},
 		Url:                 grpcutils.URLToTarget(listenOn),
 	})
+	if err != nil {
+		log.FromContext(ctx).Fatalf("failed to connect to registry: %+v", err)
+	}
 
 	return err
 }
