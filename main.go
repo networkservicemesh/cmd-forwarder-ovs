@@ -311,8 +311,9 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, source *w
 	}
 
 	tokenPool := sriovtoken.NewPool(sriovConfig)
-
-	pciPool, err := pci.NewPool(config.PCIDevicesPath, config.PCIDriversPath, config.VFIOPath, sriovConfig)
+	// create pci pool with skip checking bound driver on VF because it is no more valid for VLAN trunking
+	// when handling multiple ns clients over a single VF on the endpoint side.
+	pciPool, err := pci.NewPCIPool(config.PCIDevicesPath, config.PCIDriversPath, config.VFIOPath, sriovConfig, true)
 	if err != nil {
 		return nil, err
 	}
