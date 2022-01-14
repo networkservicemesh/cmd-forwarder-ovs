@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Nordix Foundation.
+// Copyright (c) 2021-2022 Nordix Foundation.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -14,7 +14,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//+build linux
+//go:build linux
+// +build linux
 
 // package main contains ovs forwarder implmentation
 package main
@@ -52,12 +53,12 @@ import (
 	"github.com/networkservicemesh/sdk/pkg/networkservice/common/authorize"
 	registryclient "github.com/networkservicemesh/sdk/pkg/registry/chains/client"
 	"github.com/networkservicemesh/sdk/pkg/tools/grpcutils"
-	"github.com/networkservicemesh/sdk/pkg/tools/jaeger"
 	"github.com/networkservicemesh/sdk/pkg/tools/log"
 	"github.com/networkservicemesh/sdk/pkg/tools/log/logruslogger"
-	"github.com/networkservicemesh/sdk/pkg/tools/opentracing"
+	"github.com/networkservicemesh/sdk/pkg/tools/opentelemetry"
 	"github.com/networkservicemesh/sdk/pkg/tools/spiffejwt"
 	"github.com/networkservicemesh/sdk/pkg/tools/token"
+	"github.com/networkservicemesh/sdk/pkg/tools/tracing"
 	"github.com/sirupsen/logrus"
 	"github.com/spiffe/go-spiffe/v2/spiffetls/tlsconfig"
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -85,6 +86,7 @@ type Config struct {
 	CgroupPath             string            `default:"/host/sys/fs/cgroup/devices" desc:"path to the host cgroup directory" split_words:"true"`
 	VFIOPath               string            `default:"/host/dev/vfio" desc:"path to the host VFIO directory" split_words:"true"`
 	LogLevel               string            `default:"INFO" desc:"Log level" split_words:"true"`
+	OpenTelemetryEndpoint  string            `default:"otel-collector.observability.svc.cluster.local:4317" desc:"OpenTelemetry Collector Endpoint"`
 }
 
 func main() {
@@ -123,6 +125,21 @@ func main() {
 
 	log.FromContext(ctx).Infof("Config: %#v", config)
 	log.FromContext(ctx).WithField("duration", time.Since(now)).Infof("completed phase 1: get config from environment")
+
+	// ********************************************************************************
+	// Configure Open Telemetry
+	// ********************************************************************************
+	if opentelemetry.IsEnabled() {
+		collectorAddress := config.OpenTelemetryEndpoint
+		spanExporter := opentelemetry.InitSpanExporter(ctx, collectorAddress)
+		metricExporter := opentelemetry.InitMetricExporter(ctx, collectorAddress)
+		o := opentelemetry.Init(ctx, spanExporter, metricExporter, "forwarder-ovs")
+		defer func() {
+			if err := o.Close(); err != nil {
+				log.FromContext(ctx).Fatal(err)
+			}
+		}()
+	}
 
 	// ********************************************************************************
 	log.FromContext(ctx).Infof("executing phase 2: retrieving svid, check spire agent logs if this is the last line you see (time since start: %s)", time.Since(starttime))
@@ -182,16 +199,10 @@ func setupLogger(ctx context.Context) {
 	// ********************************************************************************
 	// setup logging
 	// ********************************************************************************
+	log.EnableTracing(true)
 	logrus.SetFormatter(&nested.Formatter{})
 	ctx = log.WithLog(ctx, logruslogger.New(ctx, map[string]interface{}{"cmd": os.Args[0]}))
 	ctx = log.WithLog(ctx, logruslogger.New(ctx))
-
-	// ********************************************************************************
-	// Configure open tracing
-	// ********************************************************************************
-	log.EnableTracing(true)
-	jaegerCloser := jaeger.InitJaeger(ctx, "cmd-forwarder-ovs")
-	defer func() { _ = jaegerCloser.Close() }()
 
 	// ********************************************************************************
 	// Debug self if necessary
@@ -380,7 +391,7 @@ func isSriovConfig(confFile string) bool {
 
 func registerGRPCServer(source *workloadapi.X509Source, xConnectEndpoint endpoint.Endpoint) *grpc.Server {
 	server := grpc.NewServer(append(
-		opentracing.WithTracing(),
+		tracing.WithTracing(),
 		grpc.Creds(
 			grpcfd.TransportCredentials(
 				credentials.NewTLS(tlsconfig.MTLSServerConfig(source, source, tlsconfig.AuthorizeAny())),
@@ -392,7 +403,7 @@ func registerGRPCServer(source *workloadapi.X509Source, xConnectEndpoint endpoin
 
 func registerEndpoint(ctx context.Context, cfg *Config, source *workloadapi.X509Source, listenOn *url.URL) error {
 	clientOptions := append(
-		opentracing.WithTracingDial(),
+		tracing.WithTracingDial(),
 		grpc.WithBlock(),
 		grpc.WithDefaultCallOptions(grpc.WaitForReady(true)),
 		grpc.WithTransportCredentials(
