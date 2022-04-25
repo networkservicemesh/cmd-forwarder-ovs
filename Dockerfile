@@ -34,4 +34,4 @@ ADD build/configure-ovs.sh /usr/share/openvswitch/
 RUN chmod 755 /usr/share/openvswitch/configure-ovs.sh
 
 # When container starts, run supervisord process
-ENTRYPOINT ["/usr/bin/supervisord"]
+ENTRYPOINT ["/bin/forwarder"]

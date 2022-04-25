@@ -41,8 +41,6 @@ import (
 	k8spodresources "github.com/networkservicemesh/sdk-k8s/pkg/tools/podresources"
 	"github.com/pkg/errors"
 
-	"github.com/networkservicemesh/cmd-forwarder-ovs/internal/l2resourcecfg"
-
 	"github.com/networkservicemesh/sdk-ovs/pkg/networkservice/chains/forwarder"
 	ovsutil "github.com/networkservicemesh/sdk-ovs/pkg/tools/utils"
 	sriovconfig "github.com/networkservicemesh/sdk-sriov/pkg/sriov/config"
@@ -65,6 +63,9 @@ import (
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+
+	"github.com/networkservicemesh/cmd-forwarder-ovs/internal/l2resourcecfg"
+	"github.com/networkservicemesh/cmd-forwarder-ovs/internal/ovsinit"
 )
 
 // Config - configuration for cmd-forwarder-ovs
@@ -89,6 +90,10 @@ type Config struct {
 	LogLevel               string            `default:"INFO" desc:"Log level" split_words:"true"`
 	OpenTelemetryEndpoint  string            `default:"otel-collector.observability.svc.cluster.local:4317" desc:"OpenTelemetry Collector Endpoint"`
 }
+
+// supervisor starting ovsdb-server and ovs-vswitchd,
+// each with 5 seconds starting timeout and 3 retries
+const startOvsTimeout = 30
 
 func main() {
 	// ********************************************************************************
@@ -143,7 +148,24 @@ func main() {
 	}
 
 	// ********************************************************************************
-	log.FromContext(ctx).Infof("executing phase 2: retrieving svid, check spire agent logs if this is the last line you see (time since start: %s)", time.Since(starttime))
+	log.FromContext(ctx).Infof("executing phase 2: ensure ovs is running (time since start: %s)", time.Since(starttime))
+	// ********************************************************************************
+	now = time.Now()
+	if !ovsinit.IsOvsRunning() {
+		// start ovs by supervisord
+		ovsErrCh := ovsinit.StartSupervisord(ctx)
+		exitOnErrCh(ctx, cancel, ovsErrCh)
+		if err := ovsinit.WaitForOvsVswitchd(startOvsTimeout); err != nil {
+			log.FromContext(ctx).Fatal(err)
+		}
+		log.FromContext(ctx).Info("local ovs is being used")
+	} else {
+		log.FromContext(ctx).Info("host ovs is being used")
+	}
+	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 2: ensure ovs is running")
+
+	// ********************************************************************************
+	log.FromContext(ctx).Infof("executing phase 3: retrieving svid, check spire agent logs if this is the last line you see (time since start: %s)", time.Since(starttime))
 	// ********************************************************************************
 	now = time.Now()
 	source, err := workloadapi.NewX509Source(ctx)
@@ -155,19 +177,19 @@ func main() {
 		logrus.Fatalf("error getting x509 svid: %+v", err)
 	}
 	logrus.Infof("SVID: %q", svid.ID)
-	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 2: retrieving svid")
+	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 3: retrieving svid")
 
 	// ********************************************************************************
-	log.FromContext(ctx).Infof("executing phase 3: create ovsxconnect network service endpoint (time since start: %s)", time.Since(starttime))
+	log.FromContext(ctx).Infof("executing phase 4: create ovsxconnect network service endpoint (time since start: %s)", time.Since(starttime))
 	// ********************************************************************************
 	xConnectEndpoint, err := createInterposeEndpoint(ctx, config, source)
 	if err != nil {
 		logrus.Fatalf("error configuring forwarder endpoint: %+v", err)
 	}
-	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 3: create ovsxconnect network service endpoint")
+	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 4: create ovsxconnect network service endpoint")
 
 	// ********************************************************************************
-	log.FromContext(ctx).Infof("executing phase 4: create grpc server and register ovsxconnect (time since start: %s)", time.Since(starttime))
+	log.FromContext(ctx).Infof("executing phase 5: create grpc server and register ovsxconnect (time since start: %s)", time.Since(starttime))
 	// ********************************************************************************
 	tmpDir, err := ioutil.TempDir("", "cmd-forwarder-ovs")
 	if err != nil {
@@ -179,16 +201,16 @@ func main() {
 	server := registerGRPCServer(source, xConnectEndpoint)
 	srvErrCh := grpcutils.ListenAndServe(ctx, listenOn, server)
 	exitOnErrCh(ctx, cancel, srvErrCh)
-	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 4: create grpc server and register ovsxconnect")
+	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 5: create grpc server and register ovsxconnect")
 
 	// ********************************************************************************
-	log.FromContext(ctx).Infof("executing phase 5: register %s with the registry (time since start: %s)", config.NSName, time.Since(starttime))
+	log.FromContext(ctx).Infof("executing phase 6: register %s with the registry (time since start: %s)", config.NSName, time.Since(starttime))
 	// ********************************************************************************
 	err = registerEndpoint(ctx, config, source, listenOn)
 	if err != nil {
 		log.FromContext(ctx).Fatalf("failed to connect to registry: %+v", err)
 	}
-	log.FromContext(ctx).WithField("duration", time.Since(now)).Infof("completed phase 5: register %s with the registry", config.NSName)
+	log.FromContext(ctx).WithField("duration", time.Since(now)).Infof("completed phase 6: register %s with the registry", config.NSName)
 
 	log.FromContext(ctx).Infof("Startup completed in %v", time.Since(starttime))
 
@@ -218,10 +240,11 @@ func logPhases(ctx context.Context) {
 	log.FromContext(ctx).Infof("there are 5 phases which will be executed followed by a success message:")
 	log.FromContext(ctx).Infof("the phases include:")
 	log.FromContext(ctx).Infof("1: get config from environment")
-	log.FromContext(ctx).Infof("2: retrieve spiffe svid")
-	log.FromContext(ctx).Infof("3: create ovs forwarder network service endpoint")
-	log.FromContext(ctx).Infof("4: create grpc server and register ovsxconnect")
-	log.FromContext(ctx).Infof("5: register ovs forwarder network service with the registry")
+	log.FromContext(ctx).Infof("2: ensure ovs is running")
+	log.FromContext(ctx).Infof("3: retrieve spiffe svid")
+	log.FromContext(ctx).Infof("4: create ovs forwarder network service endpoint")
+	log.FromContext(ctx).Infof("5: create grpc server and register ovsxconnect")
+	log.FromContext(ctx).Infof("6: register ovs forwarder network service with the registry")
 	log.FromContext(ctx).Infof("a final success message with start time duration")
 }
 
