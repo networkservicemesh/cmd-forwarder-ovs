@@ -182,7 +182,7 @@ func main() {
 	defer func() { _ = os.RemoveAll(tmpDir) }()
 	listenOn := &url.URL{Scheme: "unix", Path: path.Join(tmpDir, "listen_on.io.sock")}
 
-	server := registerGRPCServer(source, tlsServerConfig, xConnectEndpoint)
+	server := registerGRPCServer(tlsServerConfig, xConnectEndpoint)
 	srvErrCh := grpcutils.ListenAndServe(ctx, listenOn, server)
 	exitOnErrCh(ctx, cancel, srvErrCh)
 	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 4: create grpc server and register ovsxconnect")
@@ -190,7 +190,7 @@ func main() {
 	// ********************************************************************************
 	log.FromContext(ctx).Infof("executing phase 5: register %s with the registry (time since start: %s)", config.NSName, time.Since(starttime))
 	// ********************************************************************************
-	err = registerEndpoint(ctx, config, tlsClientConfig, source, listenOn)
+	err = registerEndpoint(ctx, config, tlsClientConfig, listenOn)
 	if err != nil {
 		log.FromContext(ctx).Fatalf("failed to connect to registry: %+v", err)
 	}
@@ -396,7 +396,7 @@ func isSriovConfig(confFile string) bool {
 	return !sriovConfig.IsDir()
 }
 
-func registerGRPCServer(source *workloadapi.X509Source, tlsServerConfig *tls.Config, xConnectEndpoint endpoint.Endpoint) *grpc.Server {
+func registerGRPCServer(tlsServerConfig *tls.Config, xConnectEndpoint endpoint.Endpoint) *grpc.Server {
 	server := grpc.NewServer(append(
 		tracing.WithTracing(),
 		grpc.Creds(
@@ -407,7 +407,7 @@ func registerGRPCServer(source *workloadapi.X509Source, tlsServerConfig *tls.Con
 	return server
 }
 
-func registerEndpoint(ctx context.Context, cfg *Config, tlsClientConfig *tls.Config, source *workloadapi.X509Source, listenOn *url.URL) error {
+func registerEndpoint(ctx context.Context, cfg *Config, tlsClientConfig *tls.Config, listenOn *url.URL) error {
 	clientOptions := append(
 		tracing.WithTracingDial(),
 		grpc.WithBlock(),
