@@ -63,6 +63,7 @@ import (
 	"github.com/networkservicemesh/sdk/pkg/tools/tracing"
 	"github.com/sirupsen/logrus"
 	"github.com/spiffe/go-spiffe/v2/spiffetls/tlsconfig"
+	"github.com/spiffe/go-spiffe/v2/svid/x509svid"
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -280,7 +281,7 @@ func parseTunnelIPCIDR(tunnelIPStr string) (net.IP, error) {
 	return egressTunnelIP, err
 }
 
-func createInterposeEndpoint(ctx context.Context, config *Config, tlsClientConfig *tls.Config, source *workloadapi.X509Source) (xConnectEndpoint endpoint.Endpoint, err error) {
+func createInterposeEndpoint(ctx context.Context, config *Config, tlsClientConfig *tls.Config, source x509svid.Source) (xConnectEndpoint endpoint.Endpoint, err error) {
 	egressTunnelIP, err := parseTunnelIPCIDR(config.TunnelIP)
 	if err != nil {
 		return
@@ -294,7 +295,7 @@ func createInterposeEndpoint(ctx context.Context, config *Config, tlsClientConfi
 	return
 }
 
-func createKernelInterposeEndpoint(ctx context.Context, config *Config, tlsConfig *tls.Config, source *workloadapi.X509Source,
+func createKernelInterposeEndpoint(ctx context.Context, config *Config, tlsConfig *tls.Config, source x509svid.Source,
 	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint) (endpoint.Endpoint, error) {
 	return forwarder.NewKernelServer(
 		ctx,
@@ -317,7 +318,7 @@ func createKernelInterposeEndpoint(ctx context.Context, config *Config, tlsConfi
 	)
 }
 
-func createSriovInterposeEndpoint(ctx context.Context, config *Config, tlsConfig *tls.Config, source *workloadapi.X509Source,
+func createSriovInterposeEndpoint(ctx context.Context, config *Config, tlsConfig *tls.Config, source x509svid.Source,
 	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint) (endpoint.Endpoint, error) {
 	sriovConfig, err := sriovconfig.ReadConfig(ctx, config.SRIOVConfigFile)
 	if err != nil {
