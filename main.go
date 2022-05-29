@@ -22,6 +22,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"io/ioutil"
 	"net"
 	"net/url"
@@ -60,6 +61,7 @@ import (
 	"github.com/networkservicemesh/sdk/pkg/tools/tracing"
 	"github.com/sirupsen/logrus"
 	"github.com/spiffe/go-spiffe/v2/spiffetls/tlsconfig"
+	"github.com/spiffe/go-spiffe/v2/svid/x509svid"
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -179,10 +181,15 @@ func main() {
 	logrus.Infof("SVID: %q", svid.ID)
 	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 3: retrieving svid")
 
+	tlsClientConfig := tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny())
+	tlsClientConfig.MinVersion = tls.VersionTLS12
+	tlsServerConfig := tlsconfig.MTLSServerConfig(source, source, tlsconfig.AuthorizeAny())
+	tlsServerConfig.MinVersion = tls.VersionTLS12
+
 	// ********************************************************************************
 	log.FromContext(ctx).Infof("executing phase 4: create ovsxconnect network service endpoint (time since start: %s)", time.Since(starttime))
 	// ********************************************************************************
-	xConnectEndpoint, err := createInterposeEndpoint(ctx, config, source)
+	xConnectEndpoint, err := createInterposeEndpoint(ctx, config, tlsClientConfig, source)
 	if err != nil {
 		logrus.Fatalf("error configuring forwarder endpoint: %+v", err)
 	}
@@ -198,7 +205,7 @@ func main() {
 	defer func() { _ = os.RemoveAll(tmpDir) }()
 	listenOn := &url.URL{Scheme: "unix", Path: path.Join(tmpDir, "listen_on.io.sock")}
 
-	server := registerGRPCServer(source, xConnectEndpoint)
+	server := registerGRPCServer(tlsServerConfig, xConnectEndpoint)
 	srvErrCh := grpcutils.ListenAndServe(ctx, listenOn, server)
 	exitOnErrCh(ctx, cancel, srvErrCh)
 	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 5: create grpc server and register ovsxconnect")
@@ -206,7 +213,7 @@ func main() {
 	// ********************************************************************************
 	log.FromContext(ctx).Infof("executing phase 6: register %s with the registry (time since start: %s)", config.NSName, time.Since(starttime))
 	// ********************************************************************************
-	err = registerEndpoint(ctx, config, source, listenOn)
+	err = registerEndpoint(ctx, config, tlsClientConfig, listenOn)
 	if err != nil {
 		log.FromContext(ctx).Fatalf("failed to connect to registry: %+v", err)
 	}
@@ -297,21 +304,21 @@ func parseTunnelIPCIDR(tunnelIPStr string) (net.IP, error) {
 	return egressTunnelIP, err
 }
 
-func createInterposeEndpoint(ctx context.Context, config *Config, source *workloadapi.X509Source) (xConnectEndpoint endpoint.Endpoint, err error) {
+func createInterposeEndpoint(ctx context.Context, config *Config, tlsClientConfig *tls.Config, source x509svid.Source) (xConnectEndpoint endpoint.Endpoint, err error) {
 	egressTunnelIP, err := parseTunnelIPCIDR(config.TunnelIP)
 	if err != nil {
 		return
 	}
 	l2cMap := getL2ConnectionPointMap(ctx, config)
 	if isSriovConfig(config.SRIOVConfigFile) {
-		xConnectEndpoint, err = createSriovInterposeEndpoint(ctx, config, source, egressTunnelIP, l2cMap)
+		xConnectEndpoint, err = createSriovInterposeEndpoint(ctx, config, tlsClientConfig, source, egressTunnelIP, l2cMap)
 	} else {
-		xConnectEndpoint, err = createKernelInterposeEndpoint(ctx, config, source, egressTunnelIP, l2cMap)
+		xConnectEndpoint, err = createKernelInterposeEndpoint(ctx, config, tlsClientConfig, source, egressTunnelIP, l2cMap)
 	}
 	return
 }
 
-func createKernelInterposeEndpoint(ctx context.Context, config *Config, source *workloadapi.X509Source,
+func createKernelInterposeEndpoint(ctx context.Context, config *Config, tlsConfig *tls.Config, source x509svid.Source,
 	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint) (endpoint.Endpoint, error) {
 	return forwarder.NewKernelServer(
 		ctx,
@@ -325,7 +332,7 @@ func createKernelInterposeEndpoint(ctx context.Context, config *Config, source *
 		l2cMap,
 		grpc.WithBlock(),
 		grpc.WithTransportCredentials(
-			grpcfd.TransportCredentials(credentials.NewTLS(tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny())))),
+			grpcfd.TransportCredentials(credentials.NewTLS(tlsConfig))),
 		grpc.WithDefaultCallOptions(
 			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
 		),
@@ -334,7 +341,7 @@ func createKernelInterposeEndpoint(ctx context.Context, config *Config, source *
 	)
 }
 
-func createSriovInterposeEndpoint(ctx context.Context, config *Config, source *workloadapi.X509Source,
+func createSriovInterposeEndpoint(ctx context.Context, config *Config, tlsConfig *tls.Config, source x509svid.Source,
 	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint) (endpoint.Endpoint, error) {
 	sriovConfig, err := sriovconfig.ReadConfig(ctx, config.SRIOVConfigFile)
 	if err != nil {
@@ -381,7 +388,7 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, source *w
 		l2cMap,
 		grpc.WithBlock(),
 		grpc.WithTransportCredentials(
-			grpcfd.TransportCredentials(credentials.NewTLS(tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny())))),
+			grpcfd.TransportCredentials(credentials.NewTLS(tlsConfig))),
 		grpc.WithDefaultCallOptions(
 			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
 		),
@@ -413,28 +420,25 @@ func isSriovConfig(confFile string) bool {
 	return !sriovConfig.IsDir()
 }
 
-func registerGRPCServer(source *workloadapi.X509Source, xConnectEndpoint endpoint.Endpoint) *grpc.Server {
+func registerGRPCServer(tlsServerConfig *tls.Config, xConnectEndpoint endpoint.Endpoint) *grpc.Server {
 	server := grpc.NewServer(append(
 		tracing.WithTracing(),
 		grpc.Creds(
-			grpcfd.TransportCredentials(
-				credentials.NewTLS(tlsconfig.MTLSServerConfig(source, source, tlsconfig.AuthorizeAny())),
-			),
-		))...)
+			grpcfd.TransportCredentials(credentials.NewTLS(tlsServerConfig)),
+		),
+	)...)
 	xConnectEndpoint.Register(server)
 	return server
 }
 
-func registerEndpoint(ctx context.Context, cfg *Config, source *workloadapi.X509Source, listenOn *url.URL) error {
+func registerEndpoint(ctx context.Context, cfg *Config, tlsClientConfig *tls.Config, listenOn *url.URL) error {
 	clientOptions := append(
 		tracing.WithTracingDial(),
 		grpc.WithBlock(),
 		grpc.WithDefaultCallOptions(grpc.WaitForReady(true)),
 		grpc.WithTransportCredentials(
 			grpcfd.TransportCredentials(
-				credentials.NewTLS(
-					tlsconfig.MTLSClientConfig(source, source, tlsconfig.AuthorizeAny()),
-				),
+				credentials.NewTLS(tlsClientConfig),
 			),
 		),
 	)
