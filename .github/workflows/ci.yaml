@@ -39,7 +39,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v1
         with:
-          go-version: 1.16
+          go-version: 1.18.2
       - name: Build
         run: go build -race ./...
 
@@ -55,11 +55,11 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v1
         with:
-          go-version: 1.16
+          go-version: 1.18.2
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.35.0
+          version: v1.45.2
 
   excludeFmtErrorf:
     name: exclude fmt.Errorf
@@ -80,13 +80,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: Restrict dependencies on github.com/networkservicemesh/*
         env:
-          ALLOWED_REPOSITORIES: "sdk, api, sdk-k8s, sdk-ovs, sdk-sriov"
+          ALLOWED_REPOSITORIES: "api sdk sdk-k8s sdk-ovs sdk-sriov"
         run: |
-          for i in $(grep github.com/networkservicemesh/ go.mod | grep -v '^module' | sed 's;.*\(github.com\/networkservicemesh\/[^ ]*\).*;\1;g');do
-            if ! [ "$(echo ${ALLOWED_REPOSITORIES} | grep ${i#github.com/networkservicemesh/})" ]; then
-              echo Dependency on "${i}" is forbidden
-              exit 1
-            fi;
+          for i in $(grep -v '// indirect' go.mod | gsed -n 's:^\tgithub.com/networkservicemesh/\([^ ]\+\) .*:\1:p'); do
+            ! [[ " $ALLOWED_REPOSITORIES " =~ " $i " ]] || continue
+            echo Dependency on "${i}" is forbidden
+            exit 1
           done
 
   checkgomod:
@@ -96,7 +95,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v1
         with:
-          go-version: 1.16
+          go-version: 1.18.2
       - run: go mod tidy
       - name: Check for changes
         run: |
@@ -109,7 +108,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v1
         with:
-          go-version: 1.16
+          go-version: 1.18.2
       - run: go generate ./...
       - name: Check for changes
         run: |
@@ -134,7 +133,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v1
         with:
-          go-version: 1.16
+          go-version: 1.18.2
       - name: Build container
         run: docker build .
       - name: Run tests
