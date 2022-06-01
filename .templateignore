@@ -1,4 +1,3 @@
 README.md
 .github/workflows/ci.yaml
 .github/workflows/docker-push.yaml
-.github/workflows/release.yml
