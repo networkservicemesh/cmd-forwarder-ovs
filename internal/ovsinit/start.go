@@ -29,10 +29,17 @@ import (
 
 	"github.com/edwarnicke/exechelper"
 	"github.com/pkg/errors"
+	"gopkg.in/fsnotify.v1"
 )
 
-const pidfile = "/var/run/openvswitch/ovs-vswitchd.pid"
-const ovsVswitchdBin = "ovs-vswitchd"
+const (
+	defaultpath     = "/var/run/openvswitch/"
+	vswitchdPidfile = "ovs-vswitchd.pid"
+	dbPidfile       = "ovsdb-server.pid"
+	vswitchdBinName = "ovs-vswitchd"
+	dbBinName       = "ovsdb-server"
+	dbSockfile      = "db.sock"
+)
 
 // IsOvsRunning check the /proc for running ovs daemon
 func IsOvsRunning() bool {
@@ -43,7 +50,7 @@ func IsOvsRunning() bool {
 	for _, file := range files {
 		pid, err := strconv.ParseInt(file.Name(), 10, 0)
 		if err == nil {
-			if checkProc(int(pid)) {
+			if checkProc(int(pid), vswitchdBinName) {
 				return true
 			}
 		}
@@ -65,14 +72,29 @@ func StartSupervisord(ctx context.Context) (errCh <-chan error) {
 	return progErrCh
 }
 
-// WaitForOvsVswitchd wait for ovs pid file in default directory and check if binary is running
-func WaitForOvsVswitchd(timeout time.Duration) error {
+// WaitForOvs wait for ovs pid file in default directory and check if binary is running
+func WaitForOvs(ctx context.Context, timeout time.Duration) error {
+	vswitchdPidPath := filepath.Join(defaultpath, vswitchdPidfile)
+	err := waitForOvsProc(ctx, timeout, vswitchdPidPath, vswitchdBinName)
+	if err != nil {
+		return err
+	}
+	dbPidPath := filepath.Join(defaultpath, dbPidfile)
+	err = waitForOvsProc(ctx, timeout, dbPidPath, dbBinName)
+	if err != nil {
+		return err
+	}
+	dbSock := filepath.Join(defaultpath, dbSockfile)
+	return waitForSocket(ctx, timeout, dbSock)
+}
+
+func waitForOvsProc(ctx context.Context, timeout time.Duration, pidFile, binName string) error {
 	var err error
 	var pid int
 	ch := make(chan int, 1)
 	go func() {
 		for {
-			p, errPid := getPidFromFile()
+			p, errPid := getPidFromFile(pidFile)
 			if errPid == nil {
 				ch <- p
 				break
@@ -81,19 +103,54 @@ func WaitForOvsVswitchd(timeout time.Duration) error {
 	}()
 
 	select {
+	case pid = <-ch:
+		if !checkProc(pid, binName) {
+			err = errors.Errorf("%s failed to start", binName)
+		}
 	case <-time.After(timeout * time.Second):
 		err = errors.Errorf("timed out after %v", timeout*time.Second)
-		return err
-	case pid = <-ch:
+	case <-ctx.Done():
+		return errors.WithStack(ctx.Err())
 	}
-	if !checkProc(pid) {
-		err = errors.Errorf("ovs-vswitchd failed to start")
-		return err
+	return err
+}
+
+func waitForSocket(ctx context.Context, timeout time.Duration, dbSockName string) error {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	defer func() { _ = watcher.Close() }()
+	if err = watcher.Add(filepath.Dir(dbSockName)); err != nil {
+		return errors.WithStack(err)
+	}
+
+	_, err = os.Stat(dbSockName)
+	if os.IsNotExist(err) {
+		for {
+			select {
+			// watch for events
+			case event := <-watcher.Events:
+				if event.Name == dbSockName && event.Op == fsnotify.Create {
+					return nil
+				}
+			// watch for errors
+			case err = <-watcher.Errors:
+				return errors.WithStack(err)
+			case <-time.After(timeout * time.Second):
+				return errors.Errorf("timed out after %v", timeout*time.Second)
+			case <-ctx.Done():
+				return errors.WithStack(ctx.Err())
+			}
+		}
+	}
+	if err != nil {
+		return errors.WithStack(err)
 	}
 	return nil
 }
 
-func getPidFromFile() (int, error) {
+func getPidFromFile(pidfile string) (int, error) {
 	data, err := readData(pidfile)
 	if err != nil {
 		return 0, err
@@ -105,7 +162,7 @@ func getPidFromFile() (int, error) {
 	return pid, nil
 }
 
-func checkProc(p int) bool {
+func checkProc(p int, expected string) bool {
 	commPath := fmt.Sprintf("/proc/%d/stat", p)
 	data, err := readData(commPath)
 	if err != nil {
@@ -116,7 +173,7 @@ func checkProc(p int) bool {
 	binEnd := strings.IndexRune(data[binStart:], ')')
 	binary := data[binStart : binStart+binEnd]
 
-	if binary == ovsVswitchdBin && isRunning(data[binStart+binEnd+2:]) {
+	if binary == expected && isRunning(data[binStart+binEnd+2:]) {
 		return true
 	}
 	return false
