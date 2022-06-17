@@ -31,7 +31,9 @@ jobs:
           cat go.mod |
           grep 'github.com/networkservicemesh/.* v' |
           grep -v 'github.com/networkservicemesh/.* ${{ steps.get-tag-step.outputs.tag }}' || exit 0;
+
           exit 1;
+
   create-release:
     name: Create Release
     needs: check-gomod-deps
@@ -50,6 +52,7 @@ jobs:
           git status
           git tag ${{ needs.check-gomod-deps.outputs.tag }}
           git push origin ${{ needs.check-gomod-deps.outputs.tag }} -f
+
       - name: Create release ${{ needs.check-gomod-deps.outputs.tag }}
         uses: actions/create-release@v1
         env:
@@ -109,16 +112,20 @@ jobs:
           echo Starting to check release branch in deployments-k8s repository
           branch=release/${{ needs.create-release.outputs.tag }}
           echo branch to be checked - ${branch}
+
           if ! [ -z "$(git ls-remote --heads origin ${branch})" ]; then
             echo Branch ${branch} is already presented in deployments-k8s repository
             exit 0;
           fi
+
           echo Branch ${branch} is not presented in repository
           echo Starting to create ${branch} branch in deployments-k8s repository
+
           git config --global user.email "nsmbot@networkservicmesh.io"
           git config --global user.name "NSMBot"
           git checkout -b ${branch}
           git push -u origin ${branch} || exit 0;
+
   update-deployments-k8s:
     name: Update deployments-k8s
     needs: check-branch
@@ -138,6 +145,7 @@ jobs:
           echo "" >> /tmp/commit-message
           echo "Commit Message:"
           cat /tmp/commit-message
+
       - name: Checkout networkservicemesh/deployments-k8s
         uses: actions/checkout@v2
         with:
@@ -161,6 +169,7 @@ jobs:
             echo Repository already up to date
             exit 0;
           fi
+
           branch=release/${{ github.repository }}/${{ needs.check-branch.outputs.tag }}
           git config --global user.email "nsmbot@networkservicmesh.io"
           git config --global user.name "NSMBot"
