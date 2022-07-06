@@ -8,11 +8,11 @@ require (
 	github.com/edwarnicke/exechelper v1.0.3
 	github.com/edwarnicke/grpcfd v1.1.2
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/networkservicemesh/api v1.3.2-0.20220516230921-edaa6f46d6ab
-	github.com/networkservicemesh/sdk v0.5.1-0.20220603191023-6abdf1e0eb19
+	github.com/networkservicemesh/api v1.4.1-0.20220705145838-0b96f94a2adb
+	github.com/networkservicemesh/sdk v0.5.1-0.20220706093325-9d885cffbc5c
 	github.com/networkservicemesh/sdk-k8s v0.0.0-20211202072319-42a95584fc60
-	github.com/networkservicemesh/sdk-ovs v0.0.0-20220701102415-32b3d0513f5f
-	github.com/networkservicemesh/sdk-sriov v0.0.0-20220701101701-def85c9c0e95
+	github.com/networkservicemesh/sdk-ovs v0.0.0-20220706095047-3fe02c75f3f8
+	github.com/networkservicemesh/sdk-sriov v0.0.0-20220706094448-fe3d3b740841
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spiffe/go-spiffe/v2 v2.0.0
@@ -56,7 +56,7 @@ require (
 	github.com/miekg/dns v1.1.49 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
-	github.com/networkservicemesh/sdk-kernel v0.0.0-20220606222221-50547dc2e107 // indirect
+	github.com/networkservicemesh/sdk-kernel v0.0.0-20220706093902-9d98b29132d8 // indirect
 	github.com/open-policy-agent/opa v0.16.1 // indirect
 	github.com/ovn-org/libovsdb v0.6.1-0.20210824154155-9cab5b210dce // indirect
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31 // indirect
@@ -71,7 +71,7 @@ require (
 	github.com/spf13/afero v1.4.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/urfave/cli/v2 v2.3.0 // indirect
-	github.com/vishvananda/netlink v1.1.1-0.20220118170537-d6b03fdeb845 // indirect
+	github.com/vishvananda/netlink v1.2.1-beta.2.0.20220630165224-c591ada0fb2b // indirect
 	github.com/vishvananda/netns v0.0.0-20211101163701-50045581ed74 // indirect
 	github.com/yashtewari/glob-intersection v0.0.0-20180916065949-5c77d914dd0b // indirect
 	github.com/zeebo/errs v1.2.2 // indirect
