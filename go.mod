@@ -18,6 +18,7 @@ require (
 	github.com/spiffe/go-spiffe/v2 v2.0.0
 	github.com/stretchr/testify v1.7.0
 	google.golang.org/grpc v1.42.0
+	gopkg.in/fsnotify.v1 v1.4.7
 )
 
 require (

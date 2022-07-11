@@ -157,7 +157,7 @@ func main() {
 		// start ovs by supervisord
 		ovsErrCh := ovsinit.StartSupervisord(ctx)
 		exitOnErrCh(ctx, cancel, ovsErrCh)
-		if err := ovsinit.WaitForOvsVswitchd(startOvsTimeout); err != nil {
+		if err := ovsinit.WaitForOvs(ctx, startOvsTimeout); err != nil {
 			log.FromContext(ctx).Fatal(err)
 		}
 		log.FromContext(ctx).Info("local ovs is being used")
