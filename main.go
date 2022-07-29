@@ -55,6 +55,7 @@ import (
 	"github.com/networkservicemesh/sdk/pkg/tools/grpcutils"
 	"github.com/networkservicemesh/sdk/pkg/tools/log"
 	"github.com/networkservicemesh/sdk/pkg/tools/log/logruslogger"
+	authmonitor "github.com/networkservicemesh/sdk/pkg/tools/monitorconnection/authorize"
 	"github.com/networkservicemesh/sdk/pkg/tools/opentelemetry"
 	"github.com/networkservicemesh/sdk/pkg/tools/spiffejwt"
 	"github.com/networkservicemesh/sdk/pkg/tools/token"
@@ -324,6 +325,7 @@ func createKernelInterposeEndpoint(ctx context.Context, config *Config, tlsConfi
 		ctx,
 		config.Name,
 		authorize.NewServer(),
+		authmonitor.NewMonitorConnectionServer(),
 		spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime),
 		&config.ConnectTo,
 		config.BridgeName,
@@ -377,6 +379,7 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, tlsConfig
 		ctx,
 		config.Name,
 		authorize.NewServer(),
+		authmonitor.NewMonitorConnectionServer(),
 		spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime),
 		&config.ConnectTo,
 		config.BridgeName,
