@@ -58,6 +58,7 @@ import (
 	authmonitor "github.com/networkservicemesh/sdk/pkg/tools/monitorconnection/authorize"
 	"github.com/networkservicemesh/sdk/pkg/tools/opentelemetry"
 	"github.com/networkservicemesh/sdk/pkg/tools/spiffejwt"
+	"github.com/networkservicemesh/sdk/pkg/tools/spire"
 	"github.com/networkservicemesh/sdk/pkg/tools/token"
 	"github.com/networkservicemesh/sdk/pkg/tools/tracing"
 	"github.com/sirupsen/logrus"
@@ -374,12 +375,12 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, tlsConfig
 	); err != nil {
 		return nil, err
 	}
-
+	spiffeIDConnMap := spire.SpiffeIDConnectionMap{}
 	return forwarder.NewSriovServer(
 		ctx,
 		config.Name,
-		authorize.NewServer(),
-		authmonitor.NewMonitorConnectionServer(),
+		authorize.NewServer(authorize.WithSpiffeIDConnectionMap(&spiffeIDConnMap)),
+		authmonitor.NewMonitorConnectionServer(authmonitor.WithSpiffeIDConnectionMap(&spiffeIDConnMap)),
 		spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime),
 		&config.ConnectTo,
 		config.BridgeName,
