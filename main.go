@@ -40,8 +40,6 @@ import (
 	registryapi "github.com/networkservicemesh/api/pkg/api/registry"
 	k8sdeviceplugin "github.com/networkservicemesh/sdk-k8s/pkg/tools/deviceplugin"
 	k8spodresources "github.com/networkservicemesh/sdk-k8s/pkg/tools/podresources"
-	"github.com/pkg/errors"
-
 	"github.com/networkservicemesh/sdk-ovs/pkg/networkservice/chains/forwarder"
 	ovsutil "github.com/networkservicemesh/sdk-ovs/pkg/tools/utils"
 	sriovconfig "github.com/networkservicemesh/sdk-sriov/pkg/sriov/config"
@@ -55,10 +53,13 @@ import (
 	"github.com/networkservicemesh/sdk/pkg/tools/grpcutils"
 	"github.com/networkservicemesh/sdk/pkg/tools/log"
 	"github.com/networkservicemesh/sdk/pkg/tools/log/logruslogger"
+	monitorauthorize "github.com/networkservicemesh/sdk/pkg/tools/monitorconnection/authorize"
 	"github.com/networkservicemesh/sdk/pkg/tools/opentelemetry"
 	"github.com/networkservicemesh/sdk/pkg/tools/spiffejwt"
+	"github.com/networkservicemesh/sdk/pkg/tools/spire"
 	"github.com/networkservicemesh/sdk/pkg/tools/token"
 	"github.com/networkservicemesh/sdk/pkg/tools/tracing"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spiffe/go-spiffe/v2/spiffetls/tlsconfig"
 	"github.com/spiffe/go-spiffe/v2/svid/x509svid"
@@ -320,10 +321,13 @@ func createInterposeEndpoint(ctx context.Context, config *Config, tlsClientConfi
 
 func createKernelInterposeEndpoint(ctx context.Context, config *Config, tlsConfig *tls.Config, source x509svid.Source,
 	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint) (endpoint.Endpoint, error) {
+	var spiffeidmap spire.SpiffeIDConnectionMap
+
 	return forwarder.NewKernelServer(
 		ctx,
 		config.Name,
-		authorize.NewServer(),
+		authorize.NewServer(authorize.WithSpiffeIDConnectionMap(&spiffeidmap)),
+		monitorauthorize.NewMonitorConnectionServer(monitorauthorize.WithSpiffeIDConnectionMap(&spiffeidmap)),
 		spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime),
 		&config.ConnectTo,
 		config.BridgeName,
@@ -373,10 +377,13 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, tlsConfig
 		return nil, err
 	}
 
+	var spiffeidmap spire.SpiffeIDConnectionMap
+
 	return forwarder.NewSriovServer(
 		ctx,
 		config.Name,
-		authorize.NewServer(),
+		authorize.NewServer(authorize.WithSpiffeIDConnectionMap(&spiffeidmap)),
+		monitorauthorize.NewMonitorConnectionServer(monitorauthorize.WithSpiffeIDConnectionMap(&spiffeidmap)),
 		spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime),
 		&config.ConnectTo,
 		config.BridgeName,
