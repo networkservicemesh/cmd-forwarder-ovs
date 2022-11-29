@@ -11,8 +11,8 @@ require (
 	github.com/networkservicemesh/api v1.6.2-0.20221123101008-30ff0ca88ee8
 	github.com/networkservicemesh/sdk v0.5.1-0.20221124104929-d83bdbd65e5a
 	github.com/networkservicemesh/sdk-k8s v0.0.0-20221128102348-7b25c04bed9e
-	github.com/networkservicemesh/sdk-ovs v0.0.0-20221121210122-4eba71d5254d
-	github.com/networkservicemesh/sdk-sriov v0.0.0-20221121204559-c4f104b19b9d
+	github.com/networkservicemesh/sdk-ovs v0.0.0-20221129154537-0a3b60ac54f9
+	github.com/networkservicemesh/sdk-sriov v0.0.0-20221124105939-f2a9691542f3
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spiffe/go-spiffe/v2 v2.0.0
@@ -59,7 +59,7 @@ require (
 	github.com/miekg/dns v1.1.50 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/networkservicemesh/sdk-kernel v0.0.0-20221121203710-833d80721775 // indirect
+	github.com/networkservicemesh/sdk-kernel v0.0.0-20221124105434-74b7d540d4a3 // indirect
 	github.com/open-policy-agent/opa v0.44.0 // indirect
 	github.com/ovn-org/libovsdb v0.6.1-0.20210824154155-9cab5b210dce // indirect
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31 // indirect
