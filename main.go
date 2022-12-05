@@ -448,7 +448,6 @@ func registerEndpoint(ctx context.Context, cfg *Config, source *workloadapi.X509
 			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, cfg.MaxTokenLifetime)))),
 		grpc.WithTransportCredentials(
 			grpcfd.TransportCredentials(credentials.NewTLS(tlsClientConfig))),
-		grpc.WithDefaultCallOptions(),
 		grpcfd.WithChainStreamInterceptor(),
 		grpcfd.WithChainUnaryInterceptor(),
 	)
