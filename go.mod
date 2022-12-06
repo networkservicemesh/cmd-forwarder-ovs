@@ -10,7 +10,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/networkservicemesh/api v1.6.2-0.20221205183940-84c7ff837cdd
 	github.com/networkservicemesh/sdk v0.5.1-0.20221206103812-b6979bfe147d
-	github.com/networkservicemesh/sdk-k8s v0.0.0-20221206232124-a44ae6cddbad
+	github.com/networkservicemesh/sdk-k8s v0.0.0-20221206233229-0bd1359737d9
 	github.com/networkservicemesh/sdk-ovs v0.0.0-20221206110547-afb9aecd445b
 	github.com/networkservicemesh/sdk-sriov v0.0.0-20221206105157-ce61d862f46f
 	github.com/pkg/errors v0.9.1
@@ -107,7 +107,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1 // indirect
 	golang.org/x/sys v0.2.0 // indirect
 	golang.org/x/term v0.2.0 // indirect
-	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/text v0.5.0 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
 	golang.org/x/tools v0.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
