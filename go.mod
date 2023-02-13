@@ -9,8 +9,8 @@ require (
 	github.com/edwarnicke/grpcfd v1.1.2
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/networkservicemesh/api v1.7.2-0.20230123083145-4a6c3ec589e1
-	github.com/networkservicemesh/sdk v0.5.1-0.20230207140036-c1a6ac439d7f
-	github.com/networkservicemesh/sdk-k8s v0.0.0-20230207141120-7b1f6cf2d291
+	github.com/networkservicemesh/sdk v0.5.1-0.20230213134519-3aa9aa0d5e1b
+	github.com/networkservicemesh/sdk-k8s v0.0.0-20230213140706-4b1965b28f51
 	github.com/networkservicemesh/sdk-ovs v0.0.0-20230207144825-3be32663f061
 	github.com/networkservicemesh/sdk-sriov v0.0.0-20230207141212-27b319b3dfc4
 	github.com/pkg/errors v0.9.1
@@ -103,13 +103,13 @@ require (
 	go.opentelemetry.io/proto/otlp v0.19.0 // indirect
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 // indirect
 	golang.org/x/mod v0.7.0 // indirect
-	golang.org/x/net v0.4.0 // indirect
+	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1 // indirect
-	golang.org/x/sys v0.3.0 // indirect
-	golang.org/x/term v0.3.0 // indirect
-	golang.org/x/text v0.5.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/term v0.4.0 // indirect
+	golang.org/x/text v0.6.0 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
-	golang.org/x/tools v0.3.0 // indirect
+	golang.org/x/tools v0.5.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220915135415-7fd63a7952de // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
