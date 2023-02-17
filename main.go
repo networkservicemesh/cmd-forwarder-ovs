@@ -19,7 +19,6 @@
 //go:build linux
 // +build linux
 
-// package main contains ovs forwarder implmentation
 package main
 
 import (
