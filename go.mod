@@ -9,10 +9,10 @@ require (
 	github.com/edwarnicke/grpcfd v1.1.2
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/networkservicemesh/api v1.7.2-0.20230123083145-4a6c3ec589e1
-	github.com/networkservicemesh/sdk v0.5.1-0.20230213134519-3aa9aa0d5e1b
+	github.com/networkservicemesh/sdk v0.5.1-0.20230217110131-ff8f08b1d404
 	github.com/networkservicemesh/sdk-k8s v0.0.0-20230214093953-233b1ac6214a
-	github.com/networkservicemesh/sdk-ovs v0.0.0-20230213151908-bb42d9eb09b7
-	github.com/networkservicemesh/sdk-sriov v0.0.0-20230213142844-2ea338a83e06
+	github.com/networkservicemesh/sdk-ovs v0.0.0-20230218110142-590e4a3c128b
+	github.com/networkservicemesh/sdk-sriov v0.0.0-20230217111123-bd0128a7389d
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spiffe/go-spiffe/v2 v2.0.0
@@ -39,6 +39,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/ebay/go-ovn v0.1.1-0.20210731003635-d96abc06b52c // indirect
 	github.com/ebay/libovsdb v0.2.1-0.20200719163122-3332afaeb27c // indirect
+	github.com/edwarnicke/genericsync v0.0.0-20220910010113-61a344f9bc29 // indirect
 	github.com/edwarnicke/serialize v1.0.7 // indirect
 	github.com/emicklei/go-restful/v3 v3.8.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
@@ -68,7 +69,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/networkservicemesh/sdk-kernel v0.0.0-20230213141018-c280bc6ee279 // indirect
+	github.com/networkservicemesh/sdk-kernel v0.0.0-20230217110535-ebf5e6eccdc9 // indirect
 	github.com/open-policy-agent/opa v0.44.0 // indirect
 	github.com/ovn-org/libovsdb v0.6.1-0.20210824154155-9cab5b210dce // indirect
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31 // indirect
