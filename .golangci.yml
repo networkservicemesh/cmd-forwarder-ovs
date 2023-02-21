@@ -167,7 +167,11 @@ issues:
     - path: 'main.go'
       linters:
         - revive
+      text: 'package-comments: should have a package comment'
+    - path: main.go
+      linters:
         - funlen
+      text: "Function 'main'"
   exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0

@@ -6,13 +6,14 @@ require (
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
 	github.com/edwarnicke/debug v1.0.0
 	github.com/edwarnicke/exechelper v1.0.3
+	github.com/edwarnicke/genericsync v0.0.0-20220910010113-61a344f9bc29
 	github.com/edwarnicke/grpcfd v1.1.2
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/networkservicemesh/api v1.7.2-0.20230123083145-4a6c3ec589e1
-	github.com/networkservicemesh/sdk v0.5.1-0.20230214013943-438ec051e69b
-	github.com/networkservicemesh/sdk-k8s v0.0.0-20230214093953-233b1ac6214a
-	github.com/networkservicemesh/sdk-ovs v0.0.0-20230214124556-742c7ea96b1a
-	github.com/networkservicemesh/sdk-sriov v0.0.0-20230214123342-528783e52303
+	github.com/networkservicemesh/sdk v0.5.1-0.20230221131021-bcd1eb0f52b4
+	github.com/networkservicemesh/sdk-k8s v0.0.0-20230221132440-43b4f167f9de
+	github.com/networkservicemesh/sdk-ovs v0.0.0-20230221134133-6136ea55d805
+	github.com/networkservicemesh/sdk-sriov v0.0.0-20230221132402-5b03677ef136
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spiffe/go-spiffe/v2 v2.0.0
@@ -39,7 +40,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/ebay/go-ovn v0.1.1-0.20210731003635-d96abc06b52c // indirect
 	github.com/ebay/libovsdb v0.2.1-0.20200719163122-3332afaeb27c // indirect
-	github.com/edwarnicke/genericsync v0.0.0-20220910010113-61a344f9bc29 // indirect
 	github.com/edwarnicke/serialize v1.0.7 // indirect
 	github.com/emicklei/go-restful/v3 v3.8.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
@@ -69,7 +69,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/networkservicemesh/sdk-kernel v0.0.0-20230214122858-b7a1313f02af // indirect
+	github.com/networkservicemesh/sdk-kernel v0.0.0-20230221131057-f339c7f9142b // indirect
 	github.com/open-policy-agent/opa v0.44.0 // indirect
 	github.com/ovn-org/libovsdb v0.6.1-0.20210824154155-9cab5b210dce // indirect
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31 // indirect

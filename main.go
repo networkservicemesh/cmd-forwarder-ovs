@@ -36,6 +36,7 @@ import (
 
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/edwarnicke/debug"
+	"github.com/edwarnicke/genericsync"
 	"github.com/edwarnicke/grpcfd"
 	"github.com/kelseyhightower/envconfig"
 	registryapi "github.com/networkservicemesh/api/pkg/api/registry"
@@ -58,11 +59,11 @@ import (
 	monitorauthorize "github.com/networkservicemesh/sdk/pkg/tools/monitorconnection/authorize"
 	"github.com/networkservicemesh/sdk/pkg/tools/opentelemetry"
 	"github.com/networkservicemesh/sdk/pkg/tools/spiffejwt"
-	"github.com/networkservicemesh/sdk/pkg/tools/spire"
 	"github.com/networkservicemesh/sdk/pkg/tools/token"
 	"github.com/networkservicemesh/sdk/pkg/tools/tracing"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/spiffe/go-spiffe/v2/spiffeid"
 	"github.com/spiffe/go-spiffe/v2/spiffetls/tlsconfig"
 	"github.com/spiffe/go-spiffe/v2/svid/x509svid"
 	"github.com/spiffe/go-spiffe/v2/workloadapi"
@@ -324,7 +325,7 @@ func createInterposeEndpoint(ctx context.Context, config *Config, tlsClientConfi
 
 func createKernelInterposeEndpoint(ctx context.Context, config *Config, tlsConfig *tls.Config, source x509svid.Source,
 	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint) (endpoint.Endpoint, error) {
-	var spiffeidmap spire.SpiffeIDConnectionMap
+	var spiffeidmap genericsync.Map[spiffeid.ID, *genericsync.Map[string, struct{}]]
 
 	return forwarder.NewKernelServer(
 		ctx,
@@ -380,7 +381,7 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, tlsConfig
 		return nil, err
 	}
 
-	var spiffeidmap spire.SpiffeIDConnectionMap
+	var spiffeidmap genericsync.Map[spiffeid.ID, *genericsync.Map[string, struct{}]]
 
 	return forwarder.NewSriovServer(
 		ctx,
