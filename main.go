@@ -314,17 +314,29 @@ func createInterposeEndpoint(ctx context.Context, config *Config, tlsClientConfi
 	if err != nil {
 		return
 	}
+
+	dialOptions := append(tracing.WithTracingDial(),
+		grpc.WithBlock(),
+		grpc.WithTransportCredentials(
+			grpcfd.TransportCredentials(credentials.NewTLS(tlsClientConfig))),
+		grpc.WithDefaultCallOptions(
+			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
+		),
+		grpcfd.WithChainStreamInterceptor(),
+		grpcfd.WithChainUnaryInterceptor(),
+	)
+
 	l2cMap := getL2ConnectionPointMap(ctx, config)
 	if isSriovConfig(config.SRIOVConfigFile) {
-		xConnectEndpoint, err = createSriovInterposeEndpoint(ctx, config, tlsClientConfig, source, egressTunnelIP, l2cMap)
+		xConnectEndpoint, err = createSriovInterposeEndpoint(ctx, config, source, egressTunnelIP, l2cMap, dialOptions...)
 	} else {
-		xConnectEndpoint, err = createKernelInterposeEndpoint(ctx, config, tlsClientConfig, source, egressTunnelIP, l2cMap)
+		xConnectEndpoint, err = createKernelInterposeEndpoint(ctx, config, source, egressTunnelIP, l2cMap, dialOptions...)
 	}
 	return
 }
 
-func createKernelInterposeEndpoint(ctx context.Context, config *Config, tlsConfig *tls.Config, source x509svid.Source,
-	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint) (endpoint.Endpoint, error) {
+func createKernelInterposeEndpoint(ctx context.Context, config *Config, source x509svid.Source,
+	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint, dialOptions ...grpc.DialOption) (endpoint.Endpoint, error) {
 	var spiffeidmap genericsync.Map[spiffeid.ID, *genericsync.Map[string, struct{}]]
 
 	return forwarder.NewKernelServer(
@@ -338,19 +350,12 @@ func createKernelInterposeEndpoint(ctx context.Context, config *Config, tlsConfi
 		egressTunnelIP,
 		config.DialTimeout,
 		l2cMap,
-		grpc.WithBlock(),
-		grpc.WithTransportCredentials(
-			grpcfd.TransportCredentials(credentials.NewTLS(tlsConfig))),
-		grpc.WithDefaultCallOptions(
-			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
-		),
-		grpcfd.WithChainStreamInterceptor(),
-		grpcfd.WithChainUnaryInterceptor(),
+		dialOptions...,
 	)
 }
 
-func createSriovInterposeEndpoint(ctx context.Context, config *Config, tlsConfig *tls.Config, source x509svid.Source,
-	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint) (endpoint.Endpoint, error) {
+func createSriovInterposeEndpoint(ctx context.Context, config *Config, source x509svid.Source,
+	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint, dialOptions ...grpc.DialOption) (endpoint.Endpoint, error) {
 	sriovConfig, err := sriovconfig.ReadConfig(ctx, config.SRIOVConfigFile)
 	if err != nil {
 		return nil, err
@@ -397,14 +402,7 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, tlsConfig
 		sriovConfig,
 		config.DialTimeout,
 		l2cMap,
-		grpc.WithBlock(),
-		grpc.WithTransportCredentials(
-			grpcfd.TransportCredentials(credentials.NewTLS(tlsConfig))),
-		grpc.WithDefaultCallOptions(
-			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
-		),
-		grpcfd.WithChainStreamInterceptor(),
-		grpcfd.WithChainUnaryInterceptor(),
+		dialOptions...,
 	)
 }
 
