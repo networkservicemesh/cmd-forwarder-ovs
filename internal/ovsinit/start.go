@@ -20,7 +20,6 @@ package ovsinit
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -193,7 +192,7 @@ func isRunning(data string) bool {
 }
 
 func readData(commPath string) (string, error) {
-	dataBytes, err := ioutil.ReadFile(filepath.Clean(commPath))
+	dataBytes, err := os.ReadFile(filepath.Clean(commPath))
 	if err != nil {
 		return "", err
 	}
