@@ -95,7 +95,7 @@ type Config struct {
 	VFIOPath               string            `default:"/host/dev/vfio" desc:"path to the host VFIO directory" split_words:"true"`
 	LogLevel               string            `default:"INFO" desc:"Log level" split_words:"true"`
 	OpenTelemetryEndpoint  string            `default:"otel-collector.observability.svc.cluster.local:4317" desc:"OpenTelemetry Collector Endpoint"`
-	MetricsExportInterval  time.Duration     `default:"10s" desc:"interval between mertic exports in metrics reader" split_words:"true"`
+	MetricsExportInterval  time.Duration     `default:"10s" desc:"interval between mertics exports" split_words:"true"`
 }
 
 // supervisor starting ovsdb-server and ovs-vswitchd,
