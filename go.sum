@@ -400,8 +400,8 @@ github.com/networkservicemesh/api v1.11.0-rc.1 h1:alzO12JN+CVnPoTtxDLd4uKG+jDkw3
 github.com/networkservicemesh/api v1.11.0-rc.1/go.mod h1:DO7D13Y4x/A8tQ2cQyUWa9o5wi7XHUB8+vITWRKreCc=
 github.com/networkservicemesh/sdk v1.11.0-rc.1 h1:zLzS9YoxPmy1qou/BDT8HR0ZMAPQ07+4rdCeXLq60XA=
 github.com/networkservicemesh/sdk v1.11.0-rc.1/go.mod h1:xzeQAY+C+h/wtI+TM8zyK2aqrFrTMb4t6NLbboKaAYs=
-github.com/networkservicemesh/sdk-k8s v0.0.0-20230928141340-a06239569412 h1:+bwQ0ojOamgIc9IumcbMhEOvVXqhHCuVeVvl9niujkM=
-github.com/networkservicemesh/sdk-k8s v0.0.0-20230928141340-a06239569412/go.mod h1:lB4AYU1hdDEeyO2aIKb18/HaNcgtbII80qaBZ+7FXSM=
+github.com/networkservicemesh/sdk-k8s v1.11.0-rc.1 h1:tw8XO7GZMpKDLWsx5/A8+kBbxIZL6NpqyRg1cD7hTZk=
+github.com/networkservicemesh/sdk-k8s v1.11.0-rc.1/go.mod h1:hAYgriXYtcWCQJQlTvnjm/3VQ3Am8001XM7ytRnU49I=
 github.com/networkservicemesh/sdk-kernel v1.11.0-rc.1 h1:3IiavV6H5lL9GlqwcusBmg1LfawgnRwjz25/VwsgwyE=
 github.com/networkservicemesh/sdk-kernel v1.11.0-rc.1/go.mod h1:m5Lxx/L5vEhLKzSmF8tt+G03U2Xs6moPvUZXgsTMdIg=
 github.com/networkservicemesh/sdk-ovs v1.11.0-rc.1 h1:etruq4tqVZ37b4f4Z/walR1Tl2G+PQldl0gQ6SAx9Jg=
