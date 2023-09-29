@@ -6,8 +6,8 @@ ARG arch
 ENV ARCH=$arch
 RUN go install github.com/go-delve/delve/cmd/dlv@v1.8.2
 RUN go install github.com/grpc-ecosystem/grpc-health-probe@v0.4.1
-ADD https://github.com/spiffe/spire/releases/download/v1.8.0/spire-1.8.0-linux-${ARCH}-musl.tar.gz .
-RUN tar xzvf spire-1.8.0-linux-${ARCH}-musl.tar.gz -C /bin --strip=2 spire-1.8.0/bin/spire-server spire-1.8.0/bin/spire-agent
+RUN arch=$(uname -m | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && wget https://github.com/spiffe/spire/releases/download/v1.8.0/spire-1.8.0-linux-${arch}-musl.tar.gz
+RUN arch=$(uname -m | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && tar xzvf spire-1.8.0-linux-${arch}-musl.tar.gz -C /bin --strip=2 spire-1.8.0/bin/spire-server spire-1.8.0/bin/spire-agent
 
 FROM go as build
 WORKDIR /build
