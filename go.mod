@@ -11,7 +11,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/networkservicemesh/api v1.11.1-0.20231031152153-730abd666985
 	github.com/networkservicemesh/sdk v0.5.1-0.20231031174426-85ca154d11a8
-	github.com/networkservicemesh/sdk-k8s v0.0.0-20231031205004-c3171bf0cf3f
+	github.com/networkservicemesh/sdk-k8s v0.0.0-20231107040757-d5d1aba25a3a
 	github.com/networkservicemesh/sdk-ovs v0.0.0-20231031180132-95002894792f
 	github.com/networkservicemesh/sdk-sriov v0.0.0-20231031175612-0e655752bf94
 	github.com/pkg/errors v0.9.1
@@ -122,13 +122,13 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.28.2 // indirect
-	k8s.io/apimachinery v0.28.2 // indirect
-	k8s.io/client-go v0.28.2 // indirect
+	k8s.io/api v0.28.3 // indirect
+	k8s.io/apimachinery v0.28.3 // indirect
+	k8s.io/client-go v0.28.3 // indirect
 	k8s.io/klog v1.0.0 // indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230717233707-2695361300d9 // indirect
-	k8s.io/kubelet v0.28.2 // indirect
+	k8s.io/kubelet v0.28.3 // indirect
 	k8s.io/utils v0.0.0-20230406110748-d93618cff8a2 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
