@@ -11,6 +11,7 @@ FROM go as build
 WORKDIR /build
 COPY go.mod go.sum ./
 COPY . .
+COPY ./local ./local
 RUN go build -o /bin/forwarder .
 
 FROM build as test
