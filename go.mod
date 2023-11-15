@@ -11,7 +11,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/networkservicemesh/api v1.11.1-0.20231031152153-730abd666985
 	github.com/networkservicemesh/sdk v0.5.1-0.20231115135824-7e78948c1d57
-	github.com/networkservicemesh/sdk-k8s v0.0.0-20231114152740-5df41d25f330
+	github.com/networkservicemesh/sdk-k8s v0.0.0-20231115171822-157b38b21aeb
 	github.com/networkservicemesh/sdk-ovs v0.0.0-20231115141104-cb9bba61c5ba
 	github.com/networkservicemesh/sdk-sriov v0.0.0-20231115140431-9c748414f267
 	github.com/pkg/errors v0.9.1
