@@ -1,4 +1,4 @@
-// Copyright (c) 2021-2022 Nordix Foundation.
+// Copyright (c) 2021-2023 Nordix Foundation.
 //
 // Copyright (c) 2023 Cisco Foundation.
 //
@@ -60,6 +60,7 @@ import (
 	"github.com/networkservicemesh/sdk/pkg/tools/spiffejwt"
 	"github.com/networkservicemesh/sdk/pkg/tools/token"
 	"github.com/networkservicemesh/sdk/pkg/tools/tracing"
+	"github.com/ovn-org/ovn-kubernetes/go-controller/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spiffe/go-spiffe/v2/spiffeid"
@@ -198,6 +199,13 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("error configuring forwarder endpoint: %+v", err)
 	}
+	defer func() {
+		stdout, stderr, cmdErr := util.RunOVSVsctl("del-br", config.BridgeName)
+		if err != nil {
+			log.FromContext(ctx).Fatalf("Failed to remove bridge %s, stdout: %q, stderr: %q, error: %v", config.BridgeName, stdout, stderr, cmdErr)
+		}
+		log.FromContext(ctx).Debugf("Bridge %s removed", config.BridgeName)
+	}()
 	log.FromContext(ctx).WithField("duration", time.Since(now)).Info("completed phase 4: create ovsxconnect network service endpoint")
 
 	// ********************************************************************************
