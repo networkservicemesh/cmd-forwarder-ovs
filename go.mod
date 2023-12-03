@@ -11,7 +11,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/networkservicemesh/api v1.11.2-rc.2
 	github.com/networkservicemesh/sdk v1.11.2-rc.2
-	github.com/networkservicemesh/sdk-k8s v0.0.0-20231128121049-a06d88f948fa
+	github.com/networkservicemesh/sdk-k8s v1.11.2-rc.2
 	github.com/networkservicemesh/sdk-ovs v1.11.2-rc.2
 	github.com/networkservicemesh/sdk-sriov v1.11.2-rc.2
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31
@@ -24,7 +24,6 @@ require (
 )
 
 require (
-	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/Mellanox/sriovnet v1.0.3-0.20210630121212-0453bd4b7fbc // indirect
 	github.com/OneOfOne/xxhash v1.2.8 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect

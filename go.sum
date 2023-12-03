@@ -15,7 +15,6 @@ cloud.google.com/go/bigquery v1.3.0/go.mod h1:PjpwJnslEMmckchkHFfq+HTD2DmtT67aNF
 cloud.google.com/go/bigquery v1.4.0/go.mod h1:S8dzgnTigyfTmLBfrtrhyYhwRxG72rYxvftPBK2Dvzc=
 cloud.google.com/go/compute v1.23.1 h1:V97tBoDaZHb6leicZ1G6DLK2BAaZLJ/7+9BB/En3hR0=
 cloud.google.com/go/compute/metadata v0.2.3 h1:mg4jlk7mCAj6xXp9UJ4fjI9VUI5rubuGBW5aJ7UnBMY=
-cloud.google.com/go/compute/metadata v0.2.3/go.mod h1:VAV5nSsACxMJvgaAuX6Pk2AawlZn8kiOGuCv6gTkwuA=
 cloud.google.com/go/datastore v1.0.0/go.mod h1:LXYbyblFSglQ5pkeyhO+Qmw7ukd3C+pD7TKLgZqpHYE=
 cloud.google.com/go/datastore v1.1.0/go.mod h1:umbIZjpQpHh4hmRpGhH4tLFup+FVzqBi1b3c64qFpCk=
 cloud.google.com/go/pubsub v1.0.1/go.mod h1:R0Gpsv3s54REJCy4fxDixWD93lHJMoZTyQ2kNxGRt3I=
@@ -400,8 +399,8 @@ github.com/networkservicemesh/api v1.11.2-rc.2 h1:mJgkfYObagH77Pszk8bXSBhJ+W3cav
 github.com/networkservicemesh/api v1.11.2-rc.2/go.mod h1:E2yBac48+mMkMh6ODnsNyah4EE6rI08SMR9n+86Emxs=
 github.com/networkservicemesh/sdk v1.11.2-rc.2 h1:Dst52Xg/rSrQrpE47QF4o5zeNGHGp5SUyIRlAzSz4kw=
 github.com/networkservicemesh/sdk v1.11.2-rc.2/go.mod h1:N72X4LmZ78t3p+KbFfyUx0w4pZzkQrX008zmjHfiZyI=
-github.com/networkservicemesh/sdk-k8s v0.0.0-20231128121049-a06d88f948fa h1:X5zdEKJevPsMUYK8P43mTHGIMQEn+FXFM+9sicYl3A4=
-github.com/networkservicemesh/sdk-k8s v0.0.0-20231128121049-a06d88f948fa/go.mod h1:kVo0s9tjBXNFPXrXCAyLj4mlFzozeWOesnXcJnumdUQ=
+github.com/networkservicemesh/sdk-k8s v1.11.2-rc.2 h1:xmirhRTKeEIbmSyORu98Kf3SWZ1D84JC5Fh8XumKnjI=
+github.com/networkservicemesh/sdk-k8s v1.11.2-rc.2/go.mod h1:Vb5BaSTn+JeKe+T+v+VRESm9z+/0G6JEQmVn62V0gps=
 github.com/networkservicemesh/sdk-kernel v1.11.2-rc.2 h1:/0sFB/ARF0bF6E+S4R0JwC8zl1ukLIA7dZ2xkFX/h5Q=
 github.com/networkservicemesh/sdk-kernel v1.11.2-rc.2/go.mod h1:QZBSwfa3DnATOwnd+kwliV0jK3F7VBKlrgdvahRgZ8c=
 github.com/networkservicemesh/sdk-ovs v1.11.2-rc.2 h1:OYTemHhjrfC8s2dmwh7Kw/51+o2KrcMPlbJ6xdyMPLw=
