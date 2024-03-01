@@ -1,6 +1,6 @@
-// Copyright (c) 2021-2023 Nordix Foundation.
+// Copyright (c) 2021-2024 Nordix Foundation.
 //
-// Copyright (c) 2023 Cisco Foundation.
+// Copyright (c) 2023-2024 Cisco Foundation.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -42,6 +42,7 @@ import (
 	k8sdeviceplugin "github.com/networkservicemesh/sdk-k8s/pkg/tools/deviceplugin"
 	k8spodresources "github.com/networkservicemesh/sdk-k8s/pkg/tools/podresources"
 	"github.com/networkservicemesh/sdk-ovs/pkg/networkservice/chains/forwarder"
+	"github.com/networkservicemesh/sdk-ovs/pkg/networkservice/mechanisms/vxlan"
 	ovsutil "github.com/networkservicemesh/sdk-ovs/pkg/tools/utils"
 	sriovconfig "github.com/networkservicemesh/sdk-sriov/pkg/sriov/config"
 	"github.com/networkservicemesh/sdk-sriov/pkg/sriov/pci"
@@ -81,6 +82,7 @@ type Config struct {
 	NSName                 string            `default:"forwarder" desc:"Name of Network Service to Register with Registry"`
 	BridgeName             string            `default:"br-nsm" desc:"Name of the OvS bridge"`
 	TunnelIP               string            `desc:"IP or CIDR to use for tunnels" split_words:"true"`
+	VxlanPort              uint16            `default:"4789" desc:"VXLAN port to use" split_words:"true"`
 	ConnectTo              url.URL           `default:"unix:///connect.to.socket" desc:"url to connect to" split_words:"true"`
 	DialTimeout            time.Duration     `default:"50ms" desc:"Timeout for the dial the next endpoint" split_words:"true"`
 	MaxTokenLifetime       time.Duration     `default:"24h" desc:"maximum lifetime of tokens" split_words:"true"`
@@ -335,6 +337,17 @@ func createKernelInterposeEndpoint(ctx context.Context, config *Config, tlsConfi
 	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint) (endpoint.Endpoint, error) {
 	var spiffeidmap genericsync.Map[spiffeid.ID, *genericsync.Map[string, struct{}]]
 
+	dialOptions := append(
+		tracing.WithTracingDial(),
+		grpc.WithBlock(),
+		grpc.WithTransportCredentials(
+			grpcfd.TransportCredentials(credentials.NewTLS(tlsConfig))),
+		grpc.WithDefaultCallOptions(
+			grpc.WaitForReady(true),
+			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
+		),
+		grpcfd.WithChainStreamInterceptor(),
+		grpcfd.WithChainUnaryInterceptor())
 	return forwarder.NewKernelServer(
 		ctx,
 		config.Name,
@@ -346,14 +359,8 @@ func createKernelInterposeEndpoint(ctx context.Context, config *Config, tlsConfi
 		egressTunnelIP,
 		config.DialTimeout,
 		l2cMap,
-		grpc.WithBlock(),
-		grpc.WithTransportCredentials(
-			grpcfd.TransportCredentials(credentials.NewTLS(tlsConfig))),
-		grpc.WithDefaultCallOptions(
-			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
-		),
-		grpcfd.WithChainStreamInterceptor(),
-		grpcfd.WithChainUnaryInterceptor(),
+		forwarder.WithVxlanOptions(vxlan.WithPort(config.VxlanPort)),
+		forwarder.WithDialOptions(dialOptions...),
 	)
 }
 
@@ -391,6 +398,18 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, tlsConfig
 
 	var spiffeidmap genericsync.Map[spiffeid.ID, *genericsync.Map[string, struct{}]]
 
+	dialOptions := append(
+		tracing.WithTracingDial(),
+		grpc.WithBlock(),
+		grpc.WithTransportCredentials(
+			grpcfd.TransportCredentials(credentials.NewTLS(tlsConfig))),
+		grpc.WithDefaultCallOptions(
+			grpc.WaitForReady(true),
+			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
+		),
+		grpcfd.WithChainStreamInterceptor(),
+		grpcfd.WithChainUnaryInterceptor())
+
 	return forwarder.NewSriovServer(
 		ctx,
 		config.Name,
@@ -405,14 +424,8 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, tlsConfig
 		sriovConfig,
 		config.DialTimeout,
 		l2cMap,
-		grpc.WithBlock(),
-		grpc.WithTransportCredentials(
-			grpcfd.TransportCredentials(credentials.NewTLS(tlsConfig))),
-		grpc.WithDefaultCallOptions(
-			grpc.PerRPCCredentials(token.NewPerRPCCredentials(spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime))),
-		),
-		grpcfd.WithChainStreamInterceptor(),
-		grpcfd.WithChainUnaryInterceptor(),
+		forwarder.WithVxlanOptions(vxlan.WithPort(config.VxlanPort)),
+		forwarder.WithDialOptions(dialOptions...),
 	)
 }
 
