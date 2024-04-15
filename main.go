@@ -334,7 +334,8 @@ func createInterposeEndpoint(ctx context.Context, config *Config, tlsClientConfi
 }
 
 func createKernelInterposeEndpoint(ctx context.Context, config *Config, tlsConfig *tls.Config, source x509svid.Source,
-	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint) (endpoint.Endpoint, error) {
+	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint,
+) (endpoint.Endpoint, error) {
 	var spiffeidmap genericsync.Map[spiffeid.ID, *genericsync.Map[string, struct{}]]
 
 	dialOptions := append(
@@ -350,22 +351,23 @@ func createKernelInterposeEndpoint(ctx context.Context, config *Config, tlsConfi
 		grpcfd.WithChainUnaryInterceptor())
 	return forwarder.NewKernelServer(
 		ctx,
-		config.Name,
-		authorize.NewServer(authorize.WithSpiffeIDConnectionMap(&spiffeidmap)),
-		monitorauthorize.NewMonitorConnectionServer(monitorauthorize.WithSpiffeIDConnectionMap(&spiffeidmap)),
 		spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime),
-		&config.ConnectTo,
-		config.BridgeName,
 		egressTunnelIP,
-		config.DialTimeout,
 		l2cMap,
+		forwarder.WithName(config.Name),
+		forwarder.WithBridgeName(config.BridgeName),
+		forwarder.WithAuthorizeServer(authorize.NewServer(authorize.WithSpiffeIDConnectionMap(&spiffeidmap))),
+		forwarder.WithAuthorizeMonitorConnectionServer(monitorauthorize.NewMonitorConnectionServer(monitorauthorize.WithSpiffeIDConnectionMap(&spiffeidmap))),
+		forwarder.WithClientURL(&config.ConnectTo),
+		forwarder.WithDialTimeout(config.DialTimeout),
 		forwarder.WithVxlanOptions(vxlan.WithPort(config.VxlanPort)),
 		forwarder.WithDialOptions(dialOptions...),
 	)
 }
 
 func createSriovInterposeEndpoint(ctx context.Context, config *Config, tlsConfig *tls.Config, source x509svid.Source,
-	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint) (endpoint.Endpoint, error) {
+	egressTunnelIP net.IP, l2cMap map[string]*ovsutil.L2ConnectionPoint,
+) (endpoint.Endpoint, error) {
 	sriovConfig, err := sriovconfig.ReadConfig(ctx, config.SRIOVConfigFile)
 	if err != nil {
 		return nil, err
@@ -412,18 +414,18 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, tlsConfig
 
 	return forwarder.NewSriovServer(
 		ctx,
-		config.Name,
-		authorize.NewServer(authorize.WithSpiffeIDConnectionMap(&spiffeidmap)),
-		monitorauthorize.NewMonitorConnectionServer(monitorauthorize.WithSpiffeIDConnectionMap(&spiffeidmap)),
 		spiffejwt.TokenGeneratorFunc(source, config.MaxTokenLifetime),
-		&config.ConnectTo,
-		config.BridgeName,
 		egressTunnelIP,
 		pciPool,
 		resourcePool,
 		sriovConfig,
-		config.DialTimeout,
 		l2cMap,
+		forwarder.WithName(config.Name),
+		forwarder.WithBridgeName(config.BridgeName),
+		forwarder.WithAuthorizeServer(authorize.NewServer(authorize.WithSpiffeIDConnectionMap(&spiffeidmap))),
+		forwarder.WithAuthorizeMonitorConnectionServer(monitorauthorize.NewMonitorConnectionServer(monitorauthorize.WithSpiffeIDConnectionMap(&spiffeidmap))),
+		forwarder.WithClientURL(&config.ConnectTo),
+		forwarder.WithDialTimeout(config.DialTimeout),
 		forwarder.WithVxlanOptions(vxlan.WithPort(config.VxlanPort)),
 		forwarder.WithDialOptions(dialOptions...),
 	)
