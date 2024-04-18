@@ -10,8 +10,8 @@ require (
 	github.com/edwarnicke/grpcfd v1.1.2
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/networkservicemesh/api v1.13.1-0.20240411170402-f357d8c715a2
-	github.com/networkservicemesh/sdk v0.5.1-0.20240415093720-3eafbf6156d7
-	github.com/networkservicemesh/sdk-k8s v0.0.0-20240415152538-9ba517edbae2
+	github.com/networkservicemesh/sdk v0.5.1-0.20240418094831-608b1b518564
+	github.com/networkservicemesh/sdk-k8s v0.0.0-20240418095920-671945331706
 	github.com/networkservicemesh/sdk-ovs v0.0.0-20240415095443-306615d1e38d
 	github.com/networkservicemesh/sdk-sriov v0.0.0-20240415094843-c4bb53f2e668
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31
