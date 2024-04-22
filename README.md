@@ -16,6 +16,33 @@ You can build the docker container by running:
 docker build .
 ```
 
+# Usage
+
+## Envorinment config
+
+* `NSM_NAME`                      - Name of Endpoint (default: "forwarder")
+* `NSM_LABELS`                    - Labels related to this forwarder-vpp instance (default: "p2p:true")
+* `NSM_NSNAME`                    - Name of Network Service to Register with Registry (default: "forwarder")
+* `NSM_BRIDGE_NAME`               - Name of the OvS bridge (default: "br-nsm")
+* `NSM_TUNNEL_IP`                 - IP or CIDR to use for tunnels
+* `NSM_VXLAN_PORT`                - VXLAN port to use (default: "4789")
+* `NSM_CONNECT_TO`                - url to connect to (default: "unix:///connect.to.socket")
+* `NSM_DIAL_TIMEOUT`              - Timeout for the dial the next endpoint (default: "50ms")
+* `NSM_MAX_TOKEN_LIFETIME`        - maximum lifetime of tokens (default: "24h")
+* `NSM_REGISTRY_CLIENT_POLICIES`  - paths to files and directories that contain registry client policies (default: "etc/nsm/opa/common/.*.rego,etc/nsm/opa/registry/.*.rego,etc/nsm/opa/client/.*.rego")
+* `NSM_RESOURCE_POLL_TIMEOUT`     - device plugin polling timeout (default: "30s")
+* `NSM_DEVICE_PLUGIN_PATH`        - path to the device plugin directory (default: "/var/lib/kubelet/device-plugins/")
+* `NSM_POD_RESOURCES_PATH`        - path to the pod resources directory (default: "/var/lib/kubelet/pod-resources/")
+* `NSM_SRIOV_CONFIG_FILE`         - PCI resources config path (default: "pci.config")
+* `NSM_L2_RESOURCE_SELECTOR_FILE` - config file for resource to label matching
+* `NSM_PCI_DEVICES_PATH`          - path to the PCI devices directory (default: "/sys/bus/pci/devices")
+* `NSM_PCI_DRIVERS_PATH`          - path to the PCI drivers directory (default: "/sys/bus/pci/drivers")
+* `NSM_CGROUP_PATH`               - path to the host cgroup directory (default: "/host/sys/fs/cgroup/devices")
+* `NSM_VFIO_PATH`                 - path to the host VFIO directory (default: "/host/dev/vfio")
+* `NSM_LOG_LEVEL`                 - Log level (default: "INFO")
+* `NSM_OPEN_TELEMETRY_ENDPOINT`   - OpenTelemetry Collector Endpoint (default: "otel-collector.observability.svc.cluster.local:4317")
+* `NSM_METRICS_EXPORT_INTERVAL`   - interval between mertics exports (default: "10s")
+
 # Testing
 
 ## Testing Docker container
