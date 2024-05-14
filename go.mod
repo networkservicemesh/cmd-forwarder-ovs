@@ -11,9 +11,9 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/networkservicemesh/api v1.13.1-0.20240424210452-d0df98851760
 	github.com/networkservicemesh/sdk v0.5.1-0.20240514143502-1cbc04161aa1
-	github.com/networkservicemesh/sdk-k8s v0.0.0-20240425185509-771dae1f75a5
-	github.com/networkservicemesh/sdk-ovs v0.0.0-20240514153139-26ddef8d3e7b
-	github.com/networkservicemesh/sdk-sriov v0.0.0-20240514150857-a42297571919
+	github.com/networkservicemesh/sdk-k8s v0.0.0-20240514152501-86caea8ba172
+	github.com/networkservicemesh/sdk-ovs v0.0.0-20240425185939-91c5cfc9e28e
+	github.com/networkservicemesh/sdk-sriov v0.0.0-20240425185537-e8213fed2619
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
