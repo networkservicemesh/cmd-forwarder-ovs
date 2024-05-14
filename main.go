@@ -80,7 +80,7 @@ type Config struct {
 	Name                   string            `default:"forwarder" desc:"Name of Endpoint"`
 	Labels                 map[string]string `default:"p2p:true" desc:"Labels related to this forwarder-vpp instance"`
 	NSName                 string            `default:"forwarder" desc:"Name of Network Service to Register with Registry"`
-	BridgeName             string            `default:"br-nsm" desc:"Name of the OvS bridge"`
+	BridgeName             string            `default:"br-nsm" desc:"Name of the OvS bridge" split_words:"true"`
 	TunnelIP               string            `desc:"IP or CIDR to use for tunnels" split_words:"true"`
 	VxlanPort              uint16            `default:"4789" desc:"VXLAN port to use" split_words:"true"`
 	ConnectTo              url.URL           `default:"unix:///connect.to.socket" desc:"url to connect to" split_words:"true"`
@@ -97,7 +97,7 @@ type Config struct {
 	CgroupPath             string            `default:"/host/sys/fs/cgroup/devices" desc:"path to the host cgroup directory" split_words:"true"`
 	VFIOPath               string            `default:"/host/dev/vfio" desc:"path to the host VFIO directory" split_words:"true"`
 	LogLevel               string            `default:"INFO" desc:"Log level" split_words:"true"`
-	OpenTelemetryEndpoint  string            `default:"otel-collector.observability.svc.cluster.local:4317" desc:"OpenTelemetry Collector Endpoint"`
+	OpenTelemetryEndpoint  string            `default:"otel-collector.observability.svc.cluster.local:4317" desc:"OpenTelemetry Collector Endpoint" split_words:"true"`
 	MetricsExportInterval  time.Duration     `default:"10s" desc:"interval between mertics exports" split_words:"true"`
 }
 
