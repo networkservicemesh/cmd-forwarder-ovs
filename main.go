@@ -140,7 +140,7 @@ func main() {
 		logrus.Fatalf("error processing config from env: %+v", err)
 	}
 
-	setLogLevel(config.LogLevel)
+	setupLogLevel(ctx, config.LogLevel)
 
 	log.FromContext(ctx).Infof("Config: %#v", config)
 	log.FromContext(ctx).WithField("duration", time.Since(now)).Infof("completed phase 1: get config from environment")
@@ -513,10 +513,14 @@ func registerEndpoint(ctx context.Context, cfg *Config, source *workloadapi.X509
 	return err
 }
 
-func setLogLevel(level string) {
+func setupLogLevel(ctx context.Context, level string) {
 	l, err := logrus.ParseLevel(level)
 	if err != nil {
 		logrus.Fatalf("invalid log level %s", level)
 	}
 	logrus.SetLevel(l)
+	logruslogger.SetupLevelChangeOnSignal(ctx, map[os.Signal]logrus.Level{
+		syscall.SIGUSR1: logrus.TraceLevel,
+		syscall.SIGUSR2: l,
+	})
 }
