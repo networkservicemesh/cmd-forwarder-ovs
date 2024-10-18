@@ -1,6 +1,6 @@
 module github.com/networkservicemesh/cmd-forwarder-ovs
 
-go 1.20
+go 1.23
 
 require (
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
