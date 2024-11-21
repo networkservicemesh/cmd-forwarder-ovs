@@ -383,7 +383,7 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, tlsConfig
 		return nil, err
 	}
 
-	if err = pci.UpdateConfig(config.PCIDevicesPath, config.PCIDriversPath, sriovConfig); err != nil {
+	if err := pci.UpdateConfig(config.PCIDevicesPath, config.PCIDriversPath, sriovConfig); err != nil {
 		return nil, err
 	}
 
@@ -398,7 +398,7 @@ func createSriovInterposeEndpoint(ctx context.Context, config *Config, tlsConfig
 	resourcePool := resource.NewPool(tokenPool, sriovConfig)
 
 	// Start device plugin server
-	if err = k8sdeviceplugin.StartServers(
+	if err := k8sdeviceplugin.StartServers(
 		ctx,
 		tokenPool,
 		config.ResourcePollTimeout,

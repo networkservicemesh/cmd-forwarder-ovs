@@ -145,11 +145,17 @@ linters:
     - whitespace
 issues:
   exclude-rules:
+    - path: 'main.go'
+      linters:
+        - revive
+      text: 'package-comments: should have a package comment'
     - path: main.go
       linters:
         - funlen
-        - gocritic
-        - revive
+      text: "Function 'main'"
+    - linters:
+        - govet
+      text: 'shadow: declaration of "err" shadows declaration at line'
   exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
