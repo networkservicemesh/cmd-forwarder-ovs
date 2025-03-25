@@ -9,14 +9,14 @@ require (
 	github.com/edwarnicke/genericsync v0.0.0-20220910010113-61a344f9bc29
 	github.com/edwarnicke/grpcfd v1.1.4
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/networkservicemesh/api v1.14.2-rc.1.0.20241209080353-bbb4cd5f8f00
-	github.com/networkservicemesh/sdk v0.5.1-0.20250324141549-1039d22d7eeb
-	github.com/networkservicemesh/sdk-k8s v0.0.0-20250324144105-582f0f823d42
-	github.com/networkservicemesh/sdk-ovs v0.0.0-20250324101251-b04f3f1556bd
-	github.com/networkservicemesh/sdk-sriov v0.0.0-20250324100754-d0be48aea3b8
+	github.com/networkservicemesh/api v1.14.4-rc.1
+	github.com/networkservicemesh/sdk v1.14.4-rc.1
+	github.com/networkservicemesh/sdk-k8s v1.14.4-rc.1
+	github.com/networkservicemesh/sdk-ovs v1.14.4-rc.1
+	github.com/networkservicemesh/sdk-sriov v1.14.4-rc.1
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.3
 	github.com/spiffe/go-spiffe/v2 v2.1.7
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/grpc v1.60.1
@@ -42,7 +42,7 @@ require (
 	github.com/ebay/libovsdb v0.2.1-0.20200719163122-3332afaeb27c // indirect
 	github.com/edwarnicke/serialize v1.0.7 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
-	github.com/fsnotify/fsnotify v1.5.4 // indirect
+	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.3 // indirect
 	github.com/go-logr/logr v1.3.0 // indirect
@@ -70,7 +70,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/networkservicemesh/sdk-kernel v0.0.0-20250324100341-9d61bd6e6d09 // indirect
+	github.com/networkservicemesh/sdk-kernel v1.14.4-rc.1 // indirect
 	github.com/open-policy-agent/opa v0.44.0 // indirect
 	github.com/ovn-org/libovsdb v0.6.1-0.20210824154155-9cab5b210dce // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
