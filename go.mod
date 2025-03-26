@@ -10,8 +10,8 @@ require (
 	github.com/edwarnicke/grpcfd v1.1.4
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/networkservicemesh/api v1.14.2-rc.1.0.20241209080353-bbb4cd5f8f00
-	github.com/networkservicemesh/sdk v0.5.1-0.20250324141549-1039d22d7eeb
-	github.com/networkservicemesh/sdk-k8s v0.0.0-20250324144105-582f0f823d42
+	github.com/networkservicemesh/sdk v0.5.1-0.20250326080154-949530e2d130
+	github.com/networkservicemesh/sdk-k8s v0.0.0-20250326080918-099f83cf0710
 	github.com/networkservicemesh/sdk-ovs v0.0.0-20250325132138-286f242d9bec
 	github.com/networkservicemesh/sdk-sriov v0.0.0-20250324150939-7e661bdfe675
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31
@@ -52,7 +52,7 @@ require (
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.1 // indirect
+	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
