@@ -11,14 +11,14 @@ require (
 	github.com/edwarnicke/genericsync v0.0.0-20220910010113-61a344f9bc29
 	github.com/edwarnicke/grpcfd v1.1.4
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/networkservicemesh/api v1.14.5-0.20250331122810-c41e3fdcf9e1
-	github.com/networkservicemesh/sdk v0.5.1-0.20250401065529-7c0bd2f15e17
-	github.com/networkservicemesh/sdk-k8s v0.0.0-20250417110113-de9b9d61dea9
-	github.com/networkservicemesh/sdk-ovs v0.0.0-20250401070521-6b2b29b39e90
-	github.com/networkservicemesh/sdk-sriov v0.0.0-20250401070119-6515cc688532
+	github.com/networkservicemesh/api v1.14.5-rc.1
+	github.com/networkservicemesh/sdk v1.14.5-rc.1
+	github.com/networkservicemesh/sdk-k8s v1.14.5-rc.1
+	github.com/networkservicemesh/sdk-ovs v1.14.5-rc.1
+	github.com/networkservicemesh/sdk-sriov v1.14.5-rc.1
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.3
 	github.com/spiffe/go-spiffe/v2 v2.1.7
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/grpc v1.65.0
@@ -44,7 +44,7 @@ require (
 	github.com/ebay/libovsdb v0.2.1-0.20200719163122-3332afaeb27c // indirect
 	github.com/edwarnicke/serialize v1.0.7 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
-	github.com/fsnotify/fsnotify v1.5.4 // indirect
+	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.4 // indirect
@@ -70,7 +70,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/networkservicemesh/sdk-kernel v0.0.0-20250401065746-7508fae33014 // indirect
+	github.com/networkservicemesh/sdk-kernel v1.14.5-rc.1 // indirect
 	github.com/open-policy-agent/opa v0.44.0 // indirect
 	github.com/ovn-org/libovsdb v0.6.1-0.20210824154155-9cab5b210dce // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
