@@ -13,7 +13,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/networkservicemesh/api v1.14.5-0.20250331122810-c41e3fdcf9e1
 	github.com/networkservicemesh/sdk v0.5.1-0.20250401065529-7c0bd2f15e17
-	github.com/networkservicemesh/sdk-k8s v0.0.0-20250417110113-de9b9d61dea9
+	github.com/networkservicemesh/sdk-k8s v0.0.0-20250424142000-b8ff45fb86c2
 	github.com/networkservicemesh/sdk-ovs v0.0.0-20250401070521-6b2b29b39e90
 	github.com/networkservicemesh/sdk-sriov v0.0.0-20250401070119-6515cc688532
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31
@@ -106,7 +106,7 @@ require (
 	golang.org/x/crypto v0.35.0 // indirect
 	golang.org/x/mod v0.21.0 // indirect
 	golang.org/x/net v0.36.0 // indirect
-	golang.org/x/oauth2 v0.23.0 // indirect
+	golang.org/x/oauth2 v0.27.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/term v0.29.0 // indirect
