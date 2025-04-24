@@ -421,8 +421,8 @@ github.com/networkservicemesh/api v1.14.5-0.20250331122810-c41e3fdcf9e1 h1:3vfHI
 github.com/networkservicemesh/api v1.14.5-0.20250331122810-c41e3fdcf9e1/go.mod h1:+wUn/OlUyKWLaVoZOsHbiGKe7MPk82CQLGvGyoWULp8=
 github.com/networkservicemesh/sdk v0.5.1-0.20250401065529-7c0bd2f15e17 h1:Ar60JMZig6W5yREfYg8uqkurNPtOhIQ775lgizkKARw=
 github.com/networkservicemesh/sdk v0.5.1-0.20250401065529-7c0bd2f15e17/go.mod h1:7oi2SgOTu3LOpBsYSyJWe2kgkkoPeJsUiIv3U1ypMJw=
-github.com/networkservicemesh/sdk-k8s v0.0.0-20250417110113-de9b9d61dea9 h1:AWc4n+4W5m+CBwvkXut8lHi81FBumiMepkuyYXlK9EI=
-github.com/networkservicemesh/sdk-k8s v0.0.0-20250417110113-de9b9d61dea9/go.mod h1:J+kanedPvlbhAKszRf9kYqSiF0i94Q6oHhplD+EGcVo=
+github.com/networkservicemesh/sdk-k8s v0.0.0-20250424142000-b8ff45fb86c2 h1:qUBwArkdxMRhGWi5K0CkzUPnAe/ko97wziZijS/86ow=
+github.com/networkservicemesh/sdk-k8s v0.0.0-20250424142000-b8ff45fb86c2/go.mod h1:O1O9+pjsqarW2GPnBVqxEB7/Pk6Ebe6x6uekG+18u+M=
 github.com/networkservicemesh/sdk-kernel v0.0.0-20250401065746-7508fae33014 h1:USVLM6qKZGHTJYmal/qj1Ia20dPZFa4FbY8yzCollv8=
 github.com/networkservicemesh/sdk-kernel v0.0.0-20250401065746-7508fae33014/go.mod h1:98uVdZg2h69XLa7yx5gwjTPKOXx5bjUrDPKK5PwvIGI=
 github.com/networkservicemesh/sdk-ovs v0.0.0-20250401070521-6b2b29b39e90 h1:249EdmGa0p45AcGIA/zw1ZIw4lTt7H0tYk0tv7CBVGY=
@@ -707,8 +707,8 @@ golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421/go.mod h1:gOpvHmFTYa4Iltr
 golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
-golang.org/x/oauth2 v0.23.0 h1:PbgcYx2W7i4LvjJWEbf0ngHV6qJYr86PkAV3bXdLEbs=
-golang.org/x/oauth2 v0.23.0/go.mod h1:XYTD2NtWslqkgxebSiOHnXEap4TF09sJSc7H1sXbhtI=
+golang.org/x/oauth2 v0.27.0 h1:da9Vo7/tDv5RH/7nZDz1eMGS/q1Vv1N/7FCrBhI9I3M=
+golang.org/x/oauth2 v0.27.0/go.mod h1:onh5ek6nERTohokkhCD/y2cV4Do3fxFHFuAejCkRWT8=
 golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20181108010431-42b317875d0f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
