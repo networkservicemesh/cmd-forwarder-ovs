@@ -419,10 +419,10 @@ github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRW
 github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f/go.mod h1:ZdcZmHo+o7JKHSa8/e818NopupXU1YMK5fe1lsApnBw=
 github.com/networkservicemesh/api v1.14.5-0.20250331122810-c41e3fdcf9e1 h1:3vfHIeBTGa1syGrRKrbR4td8/6Kzwmb5j4fHbSbJtXM=
 github.com/networkservicemesh/api v1.14.5-0.20250331122810-c41e3fdcf9e1/go.mod h1:+wUn/OlUyKWLaVoZOsHbiGKe7MPk82CQLGvGyoWULp8=
-github.com/networkservicemesh/sdk v0.5.1-0.20250428120038-b6c4fd5f2b6d h1:eVfEXwgr1q/rp01XJvGMRT61jSmQEQUxHgnlGRELq30=
-github.com/networkservicemesh/sdk v0.5.1-0.20250428120038-b6c4fd5f2b6d/go.mod h1:urN9CZc5+qx1RVgPcLNydEqTK3SNjdfyxhAqHeV9ty0=
-github.com/networkservicemesh/sdk-k8s v0.0.0-20250428120752-bd714a6e8e43 h1:1DPZjbZmdsaaW4EcYV1PryU2tnKjw58s1rWB/mNLAeg=
-github.com/networkservicemesh/sdk-k8s v0.0.0-20250428120752-bd714a6e8e43/go.mod h1:2Wqz8gzcE4N5Sp0x+rviJrx2ToU3QqRbJoKGSLgEKPk=
+github.com/networkservicemesh/sdk v0.5.1-0.20250505143052-4652248ac0de h1:hnvJFzqlg/CTsl54j8uRoOby9TFChL2UW4p5kK1geSs=
+github.com/networkservicemesh/sdk v0.5.1-0.20250505143052-4652248ac0de/go.mod h1:FOU8BSkS+aCMSTygg+UOaDiBAe3QbwHWoBvuoHZ8EX4=
+github.com/networkservicemesh/sdk-k8s v0.0.0-20250505143539-641c4bcf5249 h1:AJ4kLNNa3EOcVoPXwYXDY54UdMvMZqsuiFkLRe3DCoU=
+github.com/networkservicemesh/sdk-k8s v0.0.0-20250505143539-641c4bcf5249/go.mod h1:qW3iC2Dpqwhwbc/9vMfm2XxHxi6ARsYZJu6GS1gQg+s=
 github.com/networkservicemesh/sdk-kernel v0.0.0-20250428120231-4c620f77f088 h1:euNeBZwRDQ7xzf5ap57aBB2nRrlbrhVPq4G1NOADTa8=
 github.com/networkservicemesh/sdk-kernel v0.0.0-20250428120231-4c620f77f088/go.mod h1:6JBrclHJRY8SxdJicEE5h/E+m5WEtR/XQE7exikTims=
 github.com/networkservicemesh/sdk-ovs v0.0.0-20250428121116-65d655cc04c8 h1:LliDeFd3Vgbo/qHqoYLtNd7L7NVQlJx8Cn1Jgv3Awlo=
