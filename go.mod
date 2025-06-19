@@ -12,8 +12,8 @@ require (
 	github.com/networkservicemesh/api v1.14.5-0.20250331122810-c41e3fdcf9e1
 	github.com/networkservicemesh/sdk v0.5.1-0.20250619121101-b08fd5a056aa
 	github.com/networkservicemesh/sdk-k8s v0.0.0-20250619121816-82c9e9b4a2fc
-	github.com/networkservicemesh/sdk-ovs v0.0.0-20250616164539-f2494378250b
-	github.com/networkservicemesh/sdk-sriov v0.0.0-20250616164110-a09fb762ad29
+	github.com/networkservicemesh/sdk-ovs v0.0.0-20250619122112-8c7d3f7f6677
+	github.com/networkservicemesh/sdk-sriov v0.0.0-20250619121707-830516efb0bc
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
