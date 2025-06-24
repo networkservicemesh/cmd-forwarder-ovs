@@ -9,9 +9,9 @@ require (
 	github.com/edwarnicke/genericsync v0.0.0-20220910010113-61a344f9bc29
 	github.com/edwarnicke/grpcfd v1.1.4
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/networkservicemesh/api v1.14.5-0.20250331122810-c41e3fdcf9e1
-	github.com/networkservicemesh/sdk v0.5.1-0.20250623070910-0a56cb0a5411
-	github.com/networkservicemesh/sdk-k8s v0.0.0-20250619121816-82c9e9b4a2fc
+	github.com/networkservicemesh/api v1.15.0-rc.1.0.20250624133102-a309c991bec7
+	github.com/networkservicemesh/sdk v0.5.1-0.20250624134138-8c5ddd885d6b
+	github.com/networkservicemesh/sdk-k8s v0.0.0-20250624135105-a889e20589f8
 	github.com/networkservicemesh/sdk-ovs v0.0.0-20250623072300-43273cc748f1
 	github.com/networkservicemesh/sdk-sriov v0.0.0-20250623071822-a6c3819a88dc
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31
