@@ -1,6 +1,8 @@
 module github.com/networkservicemesh/cmd-forwarder-ovs
 
-go 1.23.8
+go 1.24.0
+
+toolchain go1.24.10
 
 require (
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
@@ -10,10 +12,10 @@ require (
 	github.com/edwarnicke/grpcfd v1.1.4
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/networkservicemesh/api v1.15.0-rc.1.0.20250625083423-2e0c8496e4e3
-	github.com/networkservicemesh/sdk v0.5.1-0.20250716141930-3185db764c2f
+	github.com/networkservicemesh/sdk v0.5.1-0.20251119123020-9b3c88332081
 	github.com/networkservicemesh/sdk-k8s v0.0.0-20250716142500-665385153948
-	github.com/networkservicemesh/sdk-ovs v0.0.0-20250625120241-33f3485dd49c
-	github.com/networkservicemesh/sdk-sriov v0.0.0-20250625115831-e55cf40edbeb
+	github.com/networkservicemesh/sdk-ovs v0.0.0-20251119124035-9f6cf714e32b
+	github.com/networkservicemesh/sdk-sriov v0.0.0-20251119123626-26fe4a3f9d0d
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
@@ -69,7 +71,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/networkservicemesh/sdk-kernel v0.0.0-20250625085850-6a0a3efab3f9 // indirect
+	github.com/networkservicemesh/sdk-kernel v0.0.0-20251119123246-a0e68dfd1478 // indirect
 	github.com/open-policy-agent/opa v1.4.0 // indirect
 	github.com/ovn-org/libovsdb v0.6.1-0.20210824154155-9cab5b210dce // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
@@ -103,16 +105,16 @@ require (
 	go.opentelemetry.io/otel/trace v1.35.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.5.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	golang.org/x/crypto v0.36.0 // indirect
-	golang.org/x/mod v0.21.0 // indirect
-	golang.org/x/net v0.38.0 // indirect
+	golang.org/x/crypto v0.43.0 // indirect
+	golang.org/x/mod v0.28.0 // indirect
+	golang.org/x/net v0.45.0 // indirect
 	golang.org/x/oauth2 v0.27.0 // indirect
-	golang.org/x/sync v0.12.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
-	golang.org/x/term v0.30.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
+	golang.org/x/sync v0.17.0 // indirect
+	golang.org/x/sys v0.37.0 // indirect
+	golang.org/x/term v0.36.0 // indirect
+	golang.org/x/text v0.30.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
-	golang.org/x/tools v0.26.0 // indirect
+	golang.org/x/tools v0.37.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250218202821-56aae31c358a // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250218202821-56aae31c358a // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
