@@ -12,8 +12,8 @@ require (
 	github.com/edwarnicke/grpcfd v1.1.4
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/networkservicemesh/api v1.15.0-rc.1.0.20250625083423-2e0c8496e4e3
-	github.com/networkservicemesh/sdk v0.5.1-0.20260401123920-4ec46252196e
-	github.com/networkservicemesh/sdk-k8s v0.0.0-20251127092809-ce51d8fc69ad
+	github.com/networkservicemesh/sdk v0.5.1-0.20260407081414-9ac672ca128d
+	github.com/networkservicemesh/sdk-k8s v0.0.0-20260407081927-4c9127fccf3d
 	github.com/networkservicemesh/sdk-ovs v0.0.0-20260401125245-6cb3b5cc9e71
 	github.com/networkservicemesh/sdk-sriov v0.0.0-20260401124608-5e32013ff947
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31
@@ -47,7 +47,7 @@ require (
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
-	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
