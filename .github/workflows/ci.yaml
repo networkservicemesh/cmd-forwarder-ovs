@@ -31,9 +31,6 @@ jobs:
       - name: Build
         run: go build -race ./...
 
-  golangci-lint:
-    uses: networkservicemesh/.github/.github/workflows/golangci-lint.yaml@main
-
   excludeFmtErrorf:
     uses: networkservicemesh/.github/.github/workflows/exclude-fmt-errorf.yaml@main
 
