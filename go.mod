@@ -9,14 +9,14 @@ require (
 	github.com/edwarnicke/genericsync v0.0.0-20220910010113-61a344f9bc29
 	github.com/edwarnicke/grpcfd v1.1.4
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/networkservicemesh/api v1.19.0-rc.1.0.20261022113800-c979690e41bf
-	github.com/networkservicemesh/sdk v0.5.1-0.20261026134645-9faef5a5ce2e
-	github.com/networkservicemesh/sdk-k8s v0.0.0-20261026135113-8e4063563e2b
-	github.com/networkservicemesh/sdk-ovs v0.0.0-20261026135756-2fe79626e529
-	github.com/networkservicemesh/sdk-sriov v0.0.0-20261026135316-850c6ed41c65
+	github.com/networkservicemesh/api v1.20.0
+	github.com/networkservicemesh/sdk v1.20.0
+	github.com/networkservicemesh/sdk-k8s v1.20.0
+	github.com/networkservicemesh/sdk-ovs v1.20.0
+	github.com/networkservicemesh/sdk-sriov v1.20.0
 	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20210826171620-f06c53111a31
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	github.com/spiffe/go-spiffe/v2 v2.7.0
 	github.com/stretchr/testify v1.11.1
 	google.golang.org/grpc v1.83.2
@@ -70,7 +70,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/networkservicemesh/sdk-kernel v0.0.0-20261026134928-08df0bf01c1d // indirect
+	github.com/networkservicemesh/sdk-kernel v1.20.0 // indirect
 	github.com/open-policy-agent/opa v1.4.0 // indirect
 	github.com/ovn-org/libovsdb v0.6.1-0.20210824154155-9cab5b210dce // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
